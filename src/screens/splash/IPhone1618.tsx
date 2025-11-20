@@ -75,8 +75,8 @@ export default function IPhone1618(props: Props) {
               }
             </Text>
             <View style={styles.row}>
-              <View style={styles.box}></View>
               <View style={styles.box2}></View>
+              <View style={styles.box}></View>
               <View style={styles.box3}></View>
             </View>
           </ImageBackground>
@@ -114,8 +114,8 @@ const styles = StyleSheet.create({
   },
   absoluteText: {
     position: "absolute",
-    bottom: -233,
-    left: 32,
+    bottom: -420,
+    left: 44,
     color: "#000000",
     fontSize: 16,
     paddingHorizontal: 10,
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   },
   absoluteText2: {
     position: "absolute",
-    bottom: -233,
+    bottom: -420,
     right: 44,
     color: "#000000",
     fontSize: 16,
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   },
   column2: {
     alignItems: "center",
-    height: 500,
+    height: 300,
   },
   column3: {
     borderRadius: 40,
@@ -179,6 +179,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     marginBottom: 7,
+    marginTop:-10
   },
   scrollView: {
     flex: 1,
