@@ -45,6 +45,9 @@ export type AuthStackParamList = {
   Verification: { phoneNumber: string; callingCode: string; countryCode: string };
   HomeRent: undefined; // Added for navigation from IPhone1642
   PropertyList: { searchQuery: string }; // Added for search navigation
+  Lists: undefined; // Added for Lists tab navigation
+  VisitScheduled: undefined; // Added for VisitScheduled screen
+  ThankYou: undefined; // Added for ThankYou screen
 };
 
 export type MainTabParamList = {

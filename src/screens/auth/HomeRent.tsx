@@ -20,6 +20,119 @@ import {
   Modal,
 } from "react-native";
 
+const { width } = Dimensions.get('window');
+
+// --- STYLES ---
+const homeStyles = StyleSheet.create({
+  yellowHeader: { width: '100%', height: 20, backgroundColor: "#FFDD32", marginBottom: 10 },
+  bottomNav: {
+    position: 'absolute', bottom: 0, left: 0, width: width, backgroundColor: "#FFDD32", borderTopLeftRadius: 24, borderTopRightRadius: 24, flexDirection: "row", paddingHorizontal: 10, paddingVertical: 12, alignItems: "center", justifyContent: "space-between", shadowColor: "#000", shadowOffset: { width: 0, height: -2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 5, paddingBottom: Platform.OS === 'ios' ? 20 : 12 
+  },
+  navItem: { flex: 1, alignItems: "center", justifyContent: 'center', height: 50 },
+  greetingRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 27, marginHorizontal: 16 },
+  actionRow: { flexDirection: "row", marginBottom: 24, marginHorizontal: 16 },
+  filterBtn: { flex: 1, alignItems: "center", borderColor: "#FFDD32", borderRadius: 10, borderWidth: 1, paddingVertical: 8, marginRight: 18, justifyContent: "center" },
+  filterIcon: { width: 24, height: 24, marginBottom: 5, borderRadius: 10 },
+  searchBar: { flexDirection: "row", alignItems: "center", borderColor: "#979797", borderRadius: 20, borderWidth: 1, marginBottom: 24, marginHorizontal: 16, backgroundColor: "#fff", height: 50 },
+  sectionHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8, marginRight: 23 },
+  sectionTitle: { color: "#000000", fontSize: 14, fontWeight: "bold" },
+  seeAll: { color: "#FFDD32", fontSize: 14, fontWeight: "bold" },
+  propertyCard: { borderColor: "#ddd", borderRadius: 20, borderWidth: 1, paddingHorizontal: 0, marginRight: 17, width: 200, backgroundColor: "#fff", paddingBottom: 10, overflow: 'hidden', shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3, elevation: 3 },
+  propertyImage: { width: '100%', height: 120, marginBottom: 8 },
+  cardPrice: { color: "#000000", fontSize: 14, fontWeight: "bold", marginBottom: 2, marginHorizontal: 10 },
+  cardTitle: { color: "#000000", fontSize: 12, fontWeight: "bold", marginBottom: 2, marginHorizontal: 10 },
+  cardLocation: { color: "#666", fontSize: 12, marginBottom: 5, marginHorizontal: 10 },
+  localityCard: { flexDirection: "row", alignItems: "center", borderColor: "#ddd", borderRadius: 20, borderWidth: 1, padding: 12, marginRight: 15, backgroundColor: "#fff", width: 280, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3, elevation: 3 },
+  localityImage: { borderRadius: 12, width: 75, height: 83, marginRight: 10 },
+  ratingContainer: { flexDirection: "row", alignItems: "center", marginBottom: 2 },
+  readReviewBtn: { flexDirection: "row", alignItems: "center", marginTop: 4 },
+  typeCard: { alignItems: 'center', justifyContent: 'center', marginRight: 12, width: 90 },
+  typeIconContainer: { width: 70, height: 70, backgroundColor: '#FFF', borderRadius: 16, justifyContent: 'center', alignItems: 'center', marginBottom: 8, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3, borderWidth: 1, borderColor: '#F0F0F0' },
+  typeIcon: { width: 32, height: 32 },
+  typeText: { fontSize: 11, fontWeight: '600', color: '#333', textAlign: 'center' }
+});
+
+const profileStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  card: {
+    width: '90%',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 20,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15
+  },
+  headerTitle: { 
+    fontSize: 18, 
+    fontWeight: 'bold', 
+    color: '#000' 
+  },
+  closeButton: { 
+    padding: 8, 
+    borderRadius: 20, 
+    backgroundColor: '#f0f0f0' 
+  },
+  divider: { 
+    height: 1, 
+    backgroundColor: '#eee', 
+    marginBottom: 15 
+  },
+  profileHeader: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    marginBottom: 20 
+  },
+  avatar: { 
+    width: 60, 
+    height: 60, 
+    borderRadius: 30, 
+    marginRight: 15 
+  },
+  userName: { 
+    fontSize: 20, 
+    fontWeight: 'bold', 
+    color: '#000' 
+  },
+  infoSection: { 
+    marginTop: 5 
+  },
+  infoTitle: { 
+    fontSize: 16, 
+    fontWeight: 'bold', 
+    color: '#555', 
+    marginBottom: 15 
+  },
+  infoRow: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    marginBottom: 12 
+  },
+  infoIcon: { 
+    width: 20, 
+    height: 20, 
+    marginRight: 12, 
+    tintColor: '#FFDD32' 
+  },
+  infoText: { 
+    fontSize: 14, 
+    color: '#333' 
+  }
+});
+
 // --- 1. Interfaces & Types ---
 
 interface PropertyData {
@@ -443,11 +556,10 @@ const PlaceholderScreen = ({ title }: { title: string }) => (
     </View>
 );
 
-// --- 6. MAIN LAYOUT ---
-
-export default function HomeRentScreen() {
+const HomeRentScreen = () => {
   const [activeTab, setActiveTab] = useState("Home");
   const [showAllTypes, setShowAllTypes] = useState(false);
+  const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
   
   // State for Profile Modal
   const [profileModalVisible, setProfileModalVisible] = useState(false);
@@ -479,14 +591,37 @@ export default function HomeRentScreen() {
           case "Account": return <PlaceholderScreen title="My Account" />;
           default: return <HomeContent onProfilePress={handleProfileClick} onNotificationPress={handleNotificationClick} onSeeAllTypes={() => setShowAllTypes(true)} />;
       }
-  }
+  };
 
   const tabs = [
-      { name: "Home", icon: "https://cdn-icons-png.flaticon.com/512/1946/1946436.png" },
-      { name: "Lists", icon: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/kwi0sLffHL/np8e1cjb_expires_30_days.png" },
-      { name: "Saved", icon: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/kwi0sLffHL/y6l2pvxu_expires_30_days.png" },
-      { name: "Payment", icon: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/kwi0sLffHL/feksi6gx_expires_30_days.png" },
-      { name: "Account", icon: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/kwi0sLffHL/ht8icv1v_expires_30_days.png" },
+      { 
+        name: "Home", 
+        icon: "https://cdn-icons-png.flaticon.com/512/1946/1946436.png",
+        onPress: () => {
+          setActiveTab("Home");
+          setShowAllTypes(false);
+        }
+      },
+      { 
+        name: "Lists", 
+        icon: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/kwi0sLffHL/np8e1cjb_expires_30_days.png",
+        onPress: () => navigation.navigate('Lists')
+      },
+      { 
+        name: "Saved", 
+        icon: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/kwi0sLffHL/y6l2pvxu_expires_30_days.png",
+        onPress: () => setActiveTab("Saved")
+      },
+      { 
+        name: "Payment", 
+        icon: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/kwi0sLffHL/feksi6gx_expires_30_days.png",
+        onPress: () => setActiveTab("Payment")
+      },
+      { 
+        name: "Account", 
+        icon: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/kwi0sLffHL/ht8icv1v_expires_30_days.png",
+        onPress: () => setActiveTab("Account")
+      },
   ];
 
   return (
@@ -511,10 +646,7 @@ export default function HomeRentScreen() {
                         <TouchableOpacity 
                             key={index} 
                             style={homeStyles.navItem} 
-                            onPress={() => {
-                                setActiveTab(tab.name);
-                                setShowAllTypes(false); 
-                            }}
+                            onPress={tab.onPress}
                             activeOpacity={0.8}
                         >
                             <Image 
@@ -548,81 +680,4 @@ export default function HomeRentScreen() {
     </>
   );
 }
-
-// --- 7. STYLES ---
-
-const { width } = Dimensions.get('window');
-
-// Styles for Profile Modal (Popup)
-const profileStyles = StyleSheet.create({
-    overlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)', // Semi-transparent background
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    card: {
-        width: '90%',
-        backgroundColor: '#fff',
-        borderRadius: 20,
-        padding: 20,
-        elevation: 10,
-        shadowColor: '#000', shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.3, shadowRadius: 10
-    },
-    headerRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 15
-    },
-    headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#000' },
-    closeButton: { 
-        padding: 8, 
-        borderRadius: 20, 
-        backgroundColor: '#f0f0f0' 
-    },
-    divider: { height: 1, backgroundColor: '#eee', marginBottom: 15 },
-    
-    profileHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
-    avatar: { width: 60, height: 60, borderRadius: 30, marginRight: 15 },
-    userName: { fontSize: 20, fontWeight: 'bold', color: '#000' },
-    
-    infoSection: { marginTop: 5 },
-    infoTitle: { fontSize: 16, fontWeight: 'bold', color: '#555', marginBottom: 15 },
-    infoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-    infoIcon: { width: 20, height: 20, marginRight: 12, tintColor: '#FFDD32' },
-    infoText: { fontSize: 14, color: '#333' }
-});
-
-// Styles for HOME Screen
-const homeStyles = StyleSheet.create({
-  yellowHeader: { width: '100%', height: 20, backgroundColor: "#FFDD32", marginBottom: 10 },
-  bottomNav: {
-    position: 'absolute', bottom: 0, left: 0, width: width, backgroundColor: "#FFDD32", borderTopLeftRadius: 24, borderTopRightRadius: 24, flexDirection: "row", paddingHorizontal: 10, paddingVertical: 12, alignItems: "center", justifyContent: "space-between", shadowColor: "#000", shadowOffset: { width: 0, height: -2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 5, paddingBottom: Platform.OS === 'ios' ? 20 : 12 
-  },
-  navItem: { flex: 1, alignItems: "center", justifyContent: 'center', height: 50 },
-  greetingRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 27, marginHorizontal: 16 },
-  actionRow: { flexDirection: "row", marginBottom: 24, marginHorizontal: 16 },
-  filterBtn: { flex: 1, alignItems: "center", borderColor: "#FFDD32", borderRadius: 10, borderWidth: 1, paddingVertical: 8, marginRight: 18, justifyContent: "center" },
-  filterIcon: { width: 24, height: 24, marginBottom: 5, borderRadius: 10 },
-  searchBar: { flexDirection: "row", alignItems: "center", borderColor: "#979797", borderRadius: 20, borderWidth: 1, marginBottom: 24, marginHorizontal: 16, backgroundColor: "#fff", height: 50 },
-  sectionHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8, marginRight: 23 },
-  sectionTitle: { color: "#000000", fontSize: 14, fontWeight: "bold" },
-  seeAll: { color: "#FFDD32", fontSize: 14, fontWeight: "bold" },
-  
-  propertyCard: { borderColor: "#ddd", borderRadius: 20, borderWidth: 1, paddingHorizontal: 0, marginRight: 17, width: 200, backgroundColor: "#fff", paddingBottom: 10, overflow: 'hidden', shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3, elevation: 3 },
-  propertyImage: { width: '100%', height: 120, marginBottom: 8 },
-  cardPrice: { color: "#000000", fontSize: 14, fontWeight: "bold", marginBottom: 2, marginHorizontal: 10 },
-  cardTitle: { color: "#000000", fontSize: 12, fontWeight: "bold", marginBottom: 2, marginHorizontal: 10 },
-  cardLocation: { color: "#666", fontSize: 12, marginBottom: 5, marginHorizontal: 10 },
-  
-  localityCard: { flexDirection: "row", alignItems: "center", borderColor: "#ddd", borderRadius: 20, borderWidth: 1, padding: 12, marginRight: 15, backgroundColor: "#fff", width: 280, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3, elevation: 3 },
-  localityImage: { borderRadius: 12, width: 75, height: 83, marginRight: 10 },
-  ratingContainer: { flexDirection: "row", alignItems: "center", marginBottom: 2 },
-  readReviewBtn: { flexDirection: "row", alignItems: "center", marginTop: 4 },
-  
-  typeCard: { alignItems: 'center', justifyContent: 'center', marginRight: 12, width: 90 },
-  typeIconContainer: { width: 70, height: 70, backgroundColor: '#FFF', borderRadius: 16, justifyContent: 'center', alignItems: 'center', marginBottom: 8, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3, borderWidth: 1, borderColor: '#F0F0F0' },
-  typeIcon: { width: 32, height: 32 },
-  typeText: { fontSize: 11, fontWeight: '600', color: '#333', textAlign: 'center' }
-});
+export default HomeRentScreen;
