@@ -13,6 +13,8 @@ import PropertyList from '../screens/auth/PropertyList';
 import Lists from '../screens/auth/Lists';
 import VisitScheduled from '../screens/auth/VisitScheduled';
 import ThankYou from '../screens/auth/ThankYou';
+import Saved from '../screens/auth/Saved';
+import Saved1 from '../screens/auth/Saved1';
 
 const Stack = createStackNavigator<AuthStackParamList>();
 
@@ -84,6 +86,20 @@ export function AuthNavigator() {
       <Stack.Screen 
         name="ThankYou" 
         component={ThankYou}
+        options={{
+          headerShown: false
+        }} 
+      />
+      <Stack.Screen 
+        name="Saved" 
+        component={Saved}
+        options={{
+          headerShown: false
+        }} 
+      />
+      <Stack.Screen 
+        name="Saved1" 
+        component={Saved1}
         options={{
           headerShown: false
         }} 

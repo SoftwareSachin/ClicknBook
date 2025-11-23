@@ -367,28 +367,36 @@ const ProfileModal = ({ visible, onClose }: ProfileModalProps) => {
 
 // --- 5. SCREENS ---
 
-const AllPropertyTypesScreen = ({ onBack }: { onBack: () => void }) => (
-    <View style={{ flex: 1, backgroundColor: '#fff' }}>
-        <View style={homeStyles.yellowHeader} />
-        <View style={{ flexDirection: 'row', alignItems: 'center', padding: 16 }}>
-            <TouchableOpacity onPress={onBack} style={{ marginRight: 10 }}>
-                <Image source={{ uri: "https://cdn-icons-png.flaticon.com/512/271/271220.png" }} style={{ width: 24, height: 24 }} />
-            </TouchableOpacity>
-            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>All Property Types</Text>
+const AllPropertyTypesScreen = ({ onBack }: { onBack: () => void }) => {
+    return (
+        <View style={{ flex: 1, backgroundColor: '#fff' }}>
+            <View style={homeStyles.yellowHeader} />
+            <View style={{ flexDirection: 'row', alignItems: 'center', padding: 16 }}>
+                <TouchableOpacity onPress={onBack} style={{ marginRight: 10 }}>
+                    <Image 
+                        source={{ uri: "https://cdn-icons-png.flaticon.com/512/271/271220.png" }} 
+                        style={{ width: 24, height: 24 }} 
+                    />
+                </TouchableOpacity>
+                <Text style={{ fontSize: 18, fontWeight: 'bold' }}>All Property Types</Text>
+            </View>
+            <FlatList 
+                data={PROPERTY_TYPES}
+                numColumns={3}
+                contentContainerStyle={{ padding: 10 }}
+                renderItem={({ item }) => (
+                    <View key={item.id} style={{ flex: 1, margin: 5 }}>
+                        <PropertyTypeCard 
+                            item={item} 
+                            onPress={() => Alert.alert("Selected", item.name)} 
+                        />
+                    </View>
+                )}
+                keyExtractor={item => item.id}
+            />
         </View>
-        <FlatList 
-            data={PROPERTY_TYPES}
-            numColumns={3}
-            contentContainerStyle={{ padding: 10 }}
-            renderItem={({ item }) => (
-                <View style={{ flex: 1, margin: 5 }}>
-                    <PropertyTypeCard item={item} onPress={() => Alert.alert("Selected", item.name)} />
-                </View>
-            )}
-            keyExtractor={item => item.id}
-        />
-    </View>
-);
+    );
+};
 
 type HomeContentNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'HomeRent'>;
 
@@ -610,7 +618,7 @@ const HomeRentScreen = () => {
       { 
         name: "Saved", 
         icon: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/kwi0sLffHL/y6l2pvxu_expires_30_days.png",
-        onPress: () => setActiveTab("Saved")
+        onPress: () => navigation.navigate('Saved')
       },
       { 
         name: "Payment", 

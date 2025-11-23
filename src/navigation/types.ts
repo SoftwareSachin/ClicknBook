@@ -48,6 +48,8 @@ export type AuthStackParamList = {
   Lists: undefined; // Added for Lists tab navigation
   VisitScheduled: undefined; // Added for VisitScheduled screen
   ThankYou: undefined; // Added for ThankYou screen
+  Saved: undefined; // Added for Saved screen
+  Saved1: undefined; // Added for Saved1 screen
 };
 
 export type MainTabParamList = {
