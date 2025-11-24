@@ -212,7 +212,13 @@ export default function Account() {
 
               {/* Settings & Legal */}
               <View style={styles.menuContainer}>
-                  <TouchableOpacity style={styles.menuItem} onPress={() => Alert.alert("Settings")}>
+                  <TouchableOpacity
+                      style={styles.menuItem}
+                      onPress={() => {
+                          // @ts-ignore - route registered in AuthNavigator
+                          navigation.navigate('Settings');
+                      }}
+                  >
                       <View style={styles.menuIconBox}><Image source={{ uri: ASSETS.settings }} style={styles.menuIcon} /></View>
                       <Text style={styles.menuTitle}>Settings</Text>
                       <Image source={{ uri: ASSETS.arrowRight }} style={styles.chevron} />

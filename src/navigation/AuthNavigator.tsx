@@ -22,6 +22,7 @@ import Account from '../screens/auth/Account';
 import OccupiedProperty from '../screens/auth/OccupiedProperty';
 import PoliceVerification from '../screens/auth/PoliceVerification';
 import IPhone1647 from '../screens/auth/IPhone1647';
+import SettingsScreen from '../screens/auth/SettingScreen';
 
 const Stack = createStackNavigator<AuthStackParamList>();
 
@@ -135,6 +136,13 @@ export function AuthNavigator() {
       <Stack.Screen 
         name="Account" 
         component={Account}
+        options={{
+          headerShown: false
+        }} 
+      />
+      <Stack.Screen 
+        name="Settings" 
+        component={SettingsScreen}
         options={{
           headerShown: false
         }} 

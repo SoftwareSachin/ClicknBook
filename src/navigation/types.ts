@@ -54,6 +54,7 @@ export type AuthStackParamList = {
   Payment: undefined; // Added for Payment screen in Auth stack
   TransactionSuccess: undefined; // Added for payment confirmation screen
   Account: undefined; // Added for Account/profile screen in Auth stack
+  Settings: undefined; // Added for Settings screen in Auth stack
   OccupiedProperty: undefined; // Added for occupied property details screen
   PoliceVerification: undefined; // Added for police verification screen
   IPhone1647: { propertyId: string }; // Added for property detail view
