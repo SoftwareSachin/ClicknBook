@@ -50,6 +50,13 @@ export type AuthStackParamList = {
   ThankYou: undefined; // Added for ThankYou screen
   Saved: undefined; // Added for Saved screen
   Saved1: undefined; // Added for Saved1 screen
+  PaymentHistory: undefined; // Added for payment history screen in Auth stack
+  Payment: undefined; // Added for Payment screen in Auth stack
+  TransactionSuccess: undefined; // Added for payment confirmation screen
+  Account: undefined; // Added for Account/profile screen in Auth stack
+  OccupiedProperty: undefined; // Added for occupied property details screen
+  PoliceVerification: undefined; // Added for police verification screen
+  IPhone1647: { propertyId: string }; // Added for property detail view
 };
 
 export type MainTabParamList = {

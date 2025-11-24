@@ -1,241 +1,335 @@
-import React, {useState} from "react";
-import { SafeAreaView, View, ImageBackground, ScrollView, Image, Text, TouchableOpacity, TextInput, StyleSheet } from "react-native";
-import CountryPicker, { CountryCode } from "react-native-country-picker-modal";
-import { StackNavigationProp } from '@react-navigation/stack';
-import { AuthStackParamList } from '../../navigation/types';
+import React, { useState } from "react";
+import { 
+  SafeAreaView, 
+  View, 
+  ScrollView, 
+  Image, 
+  Text, 
+  TouchableOpacity, 
+  TextInput, 
+  StyleSheet, 
+  StatusBar,
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+  ActivityIndicator
+} from "react-native";
+import CountryPicker, { CountryCode, Country } from "react-native-country-picker-modal";
+import { useNavigation } from "@react-navigation/native";
 
-type MobileLoginScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'MobileLogin'>;
+const { width } = Dimensions.get('window');
 
-interface MobileLoginProps {
-  navigation: MobileLoginScreenNavigationProp;
-}
+const ASSETS = {
+    illustration: "https://cdn-icons-png.flaticon.com/512/8983/8983336.png", 
+    backArrow: "https://cdn-icons-png.flaticon.com/512/271/271220.png",
+    downArrow: "https://cdn-icons-png.flaticon.com/512/2985/2985150.png"
+};
 
-export default function MobileLogin({ navigation }: MobileLoginProps) {
+export default function MobileLogin() {
+  const navigation = useNavigation();
 
-  const [textInput1, onChangeTextInput1] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [countryCode, setCountryCode] = useState<CountryCode>("IN");
   const [callingCode, setCallingCode] = useState("91");
-  const [visible, setVisible] = useState(false);
+  const [isPickerVisible, setPickerVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <ImageBackground 
-        source={{uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/63xt2c92_expires_30_days.png"}} 
-        resizeMode={'stretch'}
-        style={styles.view}
-      >
-        <ScrollView style={styles.scrollView}>
-
-          <View style={styles.view2}>
-            <Image
-              source={{uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/c47yh96b_expires_30_days.png"}}
-              resizeMode={"stretch"}
-              style={styles.image}
-            />
-          </View>
-
-          <Text style={styles.text}>
-            {"Login via Mobile Number"}
-          </Text>
-
-          <View style={styles.view3}>
-            <Text style={styles.text2}>
-              {"Enter your Mobile Number, we will send you OTP to verify later"}
-            </Text>
-          </View>
-
-          {/* MOBILE NUMBER + COUNTRY PICKER */}
-          <View style={styles.column}>
-            <Text style={styles.text3}>
-              {"Mobile Number"}
-            </Text>
-
-            <View style={styles.row}>
-
-              {/* Tap to open country picker */}
-              <TouchableOpacity 
-                style={styles.buttonRow}
-                onPress={() => setVisible(true)}
-              >
-                <Text style={styles.text4}>
-                  {`+${callingCode}`}
-                </Text>
-
-                <Image
-                  source={{uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/lxw9enwn_expires_30_days.png"}}
-                  resizeMode={"stretch"}
-                  style={styles.image2}
-                />
-              </TouchableOpacity>
-
-              {/* COUNTRY PICKER MODAL */}
-<CountryPicker
-  visible={visible}
-  withFilter
-  withFlag={true}                 // ✅ flag only in modal
-  withCallingCode
-  withCountryNameButton={false}   // ❌ do NOT show flag/name on main screen
-  withCallingCodeButton={false}   // ❌ do NOT show flag in main screen
-  withFlagButton={false}          // ❌ this is the main one!!!
-  countryCode={countryCode}
-  onSelect={(country) => {
+  const onSelectCountry = (country: Country) => {
     setCountryCode(country.cca2);
     setCallingCode(country.callingCode[0]);
-  }}
-  onClose={() => setVisible(false)}
-/>
+    setPickerVisible(false);
+  };
 
+  const handleGetOtp = async () => {
+    if (phoneNumber.length < 10) {
+      Alert.alert("Invalid Number", "Please enter a valid 10-digit mobile number.");
+      return;
+    }
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      Alert.alert("OTP Sent", `OTP sent to +${callingCode} ${phoneNumber}`);
+    }, 1500);
+  };
 
+  return (
+    <View style={styles.mainContainer}>
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+      
+      {/* Main Content Area */}
+      <SafeAreaView style={styles.safeArea}>
+        
+        {/* Visual Spacer for Header (Optional extra yellow space) */}
+        <View style={{ height: 10 }} />
 
-
-              {/* MOBILE NUMBER INPUT */}
-              <TextInput
-                placeholder={"80XXXXXXXX"}
-                value={textInput1}
-                onChangeText={onChangeTextInput1}
-                style={styles.input}
-                keyboardType="number-pad"
-              />
-
-            </View>
-          </View>
-
-          <TouchableOpacity 
-            style={[styles.button, isLoading && { opacity: 0.7 }]} 
-            onPress={async () => {
-              // Basic validation
-              if (textInput1.length !== 10) {
-                alert('Please enter a valid 10-digit mobile number');
-                return;
-              }
-
-              try {
-                setIsLoading(true);
-                // Simulate API call (replace with actual API call)
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                // On success
-                setOtpSent(true);
-                alert(`OTP sent to +${callingCode}${textInput1}`);
-                
-                // Navigate to Verification screen with phone details
-                navigation.navigate('Verification', { 
-                  phoneNumber: textInput1,
-                  callingCode,
-                  countryCode
-                });
-                
-              } catch (error) {
-                console.error('Error sending OTP:', error);
-                alert('Failed to send OTP. Please try again.');
-              } finally {
-                setIsLoading(false);
-              }
-            }}
-            disabled={isLoading}
+        <View style={styles.contentWrapper}>
+          <KeyboardAvoidingView 
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            style={{ flex: 1 }}
           >
-            <Text style={styles.text5}>
-              {isLoading ? 'Sending OTP...' : 'Get OTP'}
-            </Text>
-          </TouchableOpacity>
+            <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+              
+              {/* Header: Back Button */}
+              <View style={styles.header}>
+                  <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                      <Image source={{ uri: ASSETS.backArrow }} style={styles.backIcon} />
+                  </TouchableOpacity>
+              </View>
 
-          <View style={styles.view4}>
-            <Image
-              source={{uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/0ngroacg_expires_30_days.png"}}
-              resizeMode={"stretch"}
-              style={styles.image3}
-            />
-          </View>
+              {/* Illustration Section */}
+              <View style={styles.illustrationContainer}>
+                  <View style={styles.circleBg}>
+                      <Image 
+                          source={{ uri: ASSETS.illustration }} 
+                          style={styles.illustration} 
+                          resizeMode="contain"
+                      />
+                  </View>
+              </View>
 
-        </ScrollView>
-      </ImageBackground>
-    </SafeAreaView>
-  )
+              {/* Title Section */}
+              <View style={styles.textContainer}>
+                  <Text style={styles.title}>Login via Mobile</Text>
+                  <Text style={styles.subtitle}>
+                      We will send a One Time Password (OTP) to this mobile number.
+                  </Text>
+              </View>
+
+              {/* Input Section */}
+              <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>Mobile Number</Text>
+                  
+                  <View style={styles.phoneInputRow}>
+                      <TouchableOpacity 
+                          style={styles.countrySelector} 
+                          onPress={() => setPickerVisible(true)}
+                      >
+                          <CountryPicker
+                              visible={isPickerVisible}
+                              withFlag
+                              withFilter
+                              withCallingCode
+                              withEmoji
+                              countryCode={countryCode}
+                              onSelect={onSelectCountry}
+                              onClose={() => setPickerVisible(false)}
+                              containerButtonStyle={{ display: 'none' }} // Hides default button
+                          />
+                          <Text style={styles.callingCode}>+{callingCode}</Text>
+                          <Image source={{ uri: ASSETS.downArrow }} style={styles.dropdownIcon} />
+                      </TouchableOpacity>
+
+                      <TextInput
+                          style={styles.phoneInput}
+                          placeholder="Enter Number"
+                          placeholderTextColor="#AAA"
+                          keyboardType="number-pad"
+                          maxLength={10}
+                          value={phoneNumber}
+                          onChangeText={setPhoneNumber}
+                      />
+                  </View>
+              </View>
+
+              {/* Action Button */}
+              <TouchableOpacity 
+                  style={[
+                      styles.otpButton, 
+                      phoneNumber.length < 10 && styles.otpButtonDisabled
+                  ]} 
+                  onPress={handleGetOtp}
+                  disabled={isLoading || phoneNumber.length < 10}
+              >
+                  {isLoading ? (
+                      <ActivityIndicator color="#000" />
+                  ) : (
+                      <Text style={styles.otpButtonText}>Get OTP</Text>
+                  )}
+              </TouchableOpacity>
+
+              {/* Footer Terms */}
+              <Text style={styles.termsText}>
+                  By continuing, you agree to our <Text style={styles.linkText}>Terms of Service</Text> and <Text style={styles.linkText}>Privacy Policy</Text>.
+              </Text>
+
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </View>
+      </SafeAreaView>
+    </View>
+  );
 }
 
-
-// ----------- STYLES -------------
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFFFFF" },
-
-  button: {
-    alignItems: "center",
-    backgroundColor: "#F8D800",
-    borderRadius: 10,
-    paddingVertical: 18,
-    marginBottom: 171,
-    marginHorizontal: 16,
-  },
-
-  buttonRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F8F8F8",
-    borderColor: "#000000",
-    borderRadius: 8,
-    borderWidth: 1,
-    paddingVertical: 14,
-    paddingHorizontal: 10,
-    marginRight: 8,
-  },
-
-  column: { marginBottom: 28, marginHorizontal: 18 },
-
-  image: { borderRadius: 40, width: 151, height: 143 },
-
-  image2: { borderRadius: 8, width: 20, height: 20 },
-
-  image3: { width: 195, height: 184 },
-
-  input: {
-    color: "#000000",
-    fontSize: 12,
+  mainContainer: {
     flex: 1,
-    backgroundColor: "#F8F8F8",
-    borderColor: "#000000",
-    borderRadius: 8,
-    borderWidth: 1,
-    paddingVertical: 15,
-    paddingHorizontal: 10,
+    backgroundColor: "#FFDD32", // Yellow background for Status Bar area
+    // CRITICAL FIX for Android: Pushes content down by status bar height
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0, 
+  },
+  safeArea: {
+    flex: 1,
+  },
+  contentWrapper: {
+    flex: 1,
+    backgroundColor: "#FFFFFF", // Main Content Color
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    overflow: 'hidden',
+    // Ensure white card doesn't touch the very top edge visually
+    marginTop: 0, 
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 40,
+  },
+  
+  // Header
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 25, // Increased top padding inside white card for Back button
+  },
+  backButton: {
+    padding: 8,
+    alignSelf: 'flex-start',
+    marginLeft: -5,
+  },
+  backIcon: {
+    width: 24,
+    height: 24,
+    tintColor: '#000'
   },
 
-  row: { flexDirection: "row" },
-
-  scrollView: { flex: 1, borderRadius: 40 },
-
-  text: {
-    color: "#000000",
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 11,
-    marginLeft: 41,
+  // Illustration
+  illustrationContainer: {
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 30,
+  },
+  circleBg: {
+    width: 160,
+    height: 160,
+    backgroundColor: '#FFFBE6', 
+    borderRadius: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  illustration: {
+    width: 100,
+    height: 100,
   },
 
-  text2: {
-    color: "#979797",
-    fontSize: 14,
+  // Text
+  textContainer: {
+    paddingHorizontal: 24,
+    marginBottom: 30,
+    alignItems: 'center'
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#1F2937",
+    marginBottom: 10,
+    textAlign: 'center'
+  },
+  subtitle: {
+    fontSize: 15,
+    color: "#6B7280",
     textAlign: "center",
-    width: 264,
+    lineHeight: 22,
   },
 
-  text3: {
-    color: "#000000",
+  // Input
+  inputContainer: {
+    paddingHorizontal: 24,
+    marginBottom: 30,
+  },
+  inputLabel: {
     fontSize: 14,
-    fontWeight: "bold",
-    marginBottom: 8,
+    fontWeight: "700",
+    color: "#374151",
+    marginBottom: 10,
+    marginLeft: 4
+  },
+  phoneInputRow: {
+    flexDirection: 'row',
+    height: 56,
+  },
+  countrySelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F9FAFB',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    marginRight: 12,
+    width: 100,
+    justifyContent: 'center'
+  },
+  callingCode: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F2937',
+    marginRight: 5
+  },
+  dropdownIcon: {
+    width: 10,
+    height: 10,
+    tintColor: '#6B7280',
+    opacity: 0.7
+  },
+  phoneInput: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    fontSize: 18,
+    color: '#1F2937',
+    fontWeight: '500'
   },
 
-  text4: { color: "#000000", fontSize: 12, marginRight: 13 },
+  // Button
+  otpButton: {
+    backgroundColor: "#FFDD32", // Brand Yellow
+    marginHorizontal: 24,
+    height: 56,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: "#FFDD32",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 5,
+    marginBottom: 20,
+  },
+  otpButtonDisabled: {
+      backgroundColor: '#E5E7EB', 
+      shadowOpacity: 0,
+      elevation: 0
+  },
+  otpButtonText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#000000",
+  },
 
-  text5: { color: "#000000", fontSize: 14, fontWeight: "bold" },
-
-  view: { flex: 1, height: 200 },
-
-  view2: { alignItems: "center", marginTop: 71, marginBottom: 30 },
-
-  view3: { alignItems: "center", marginBottom: 16 },
-
-  view4: { alignItems: "flex-end" },
+  // Footer
+  termsText: {
+      textAlign: 'center',
+      marginHorizontal: 40,
+      fontSize: 12,
+      color: '#9CA3AF',
+      lineHeight: 18
+  },
+  linkText: {
+      color: '#FFDD32', 
+      fontWeight: 'bold',
+      textShadowColor: 'rgba(0,0,0,0.1)',
+      textShadowRadius: 1
+  }
 });

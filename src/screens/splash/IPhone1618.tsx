@@ -2,15 +2,17 @@ import React, { useEffect, useRef } from "react";
 import {
   SafeAreaView,
   View,
-  ScrollView,
-  ImageBackground,
   Image,
   Text,
   StyleSheet,
-  Pressable,
+  TouchableOpacity,
   Animated,
   Easing,
+  Dimensions,
+  StatusBar,
 } from "react-native";
+
+const { width, height } = Dimensions.get("window");
 
 interface NavigationLike {
   navigate?: (screen: string, params?: any) => void;
@@ -22,12 +24,13 @@ interface Props {
   navigation?: NavigationLike;
 }
 
-export default function IPhone1618(props: Props) {
+export default function OnboardingStepOne(props: Props) {
   const { onSkip, onNext, navigation } = props || {};
 
-  // Animation values
+  // Animations
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideUp = useRef(new Animated.Value(30)).current;
+  const slideUpAnim = useRef(new Animated.Value(50)).current;
+  const scaleAnim = useRef(new Animated.Value(0.9)).current;
 
   useEffect(() => {
     Animated.parallel([
@@ -36,108 +39,91 @@ export default function IPhone1618(props: Props) {
         duration: 800,
         useNativeDriver: true,
       }),
-      Animated.timing(slideUp, {
+      Animated.timing(slideUpAnim, {
         toValue: 0,
-        duration: 700,
-        easing: Easing.out(Easing.cubic),
+        duration: 800,
+        easing: Easing.out(Easing.back(1.5)),
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 7,
+        tension: 40,
         useNativeDriver: true,
       }),
     ]).start();
   }, []);
 
   function handleSkip() {
-    if (typeof onSkip === "function") {
-      onSkip();
-      return;
-    }
-    if (navigation && typeof navigation.navigate === "function") {
-      navigation.navigate("Home"); // change "Home" to your desired skip target
-      return;
-    }
-    console.log("Skip pressed");
+    if (onSkip) onSkip();
+    else if (navigation?.navigate) navigation.navigate("Home");
   }
 
   function handleNext() {
-    if (typeof onNext === "function") {
-      onNext();
-      return;
-    }
-    if (navigation && typeof navigation.navigate === "function") {
-      navigation.navigate("IPhone1617"); // change to your next screen name
-      return;
-    }
-    console.log("Next pressed");
+    if (onNext) onNext();
+    else if (navigation?.navigate) navigation.navigate("OnboardingStepTwo");
   }
 
   return (
-    <Animated.View
-      style={[
-        styles.container,
-        {
-          opacity: fadeAnim,
-          transform: [{ translateY: slideUp }],
-        },
-      ]}
-    >
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollViewContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.column}>
-          <ImageBackground
-            source={{
-              uri:
-                "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/4k41j3kd_expires_30_days.png",
-            }}
-            resizeMode={"stretch"}
-            imageStyle={styles.column3}
-            style={styles.column2}
-          >
-            <Image
-              source={{
-                uri:
-                  "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/5rqezm7k_expires_30_days.png",
-              }}
-              resizeMode={"stretch"}
-              style={styles.image}
-            />
-            <Text style={styles.text}>{"Welcome to our app"}</Text>
-            <Text style={styles.text2}>
-              {
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor "
-              }
-            </Text>
-            <View style={styles.row}>
-              <View style={styles.box2}></View>
-              <View style={styles.box}></View>
-              <View style={styles.box3}></View>
-            </View>
-          </ImageBackground>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-          {/* Keep visual styles/positions unchanged — Pressable uses same absolute styles */}
-          <Pressable
-            onPress={handleSkip}
-            style={styles.absoluteText}
-            android_ripple={{ color: "rgba(0,0,0,0.1)" }}
-            accessibilityRole="button"
-            accessibilityLabel="Skip"
-          >
-            <Text style={{ color: "#000000", fontSize: 16, fontWeight: '600' }}>Skip</Text>
-          </Pressable>
+      {/* Background Decoration */}
+      <Image
+        source={{ uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/4k41j3kd_expires_30_days.png" }}
+        style={styles.bgDecoration}
+        resizeMode="cover"
+      />
 
-          <Pressable
-            onPress={handleNext}
-            style={styles.absoluteText2}
-            android_ripple={{ color: "rgba(0,0,0,0.1)" }}
-            accessibilityRole="button"
-            accessibilityLabel="Next"
-          >
-            <Text style={{ color: "#FFFFFF", fontSize: 16, fontWeight: '600' }}>Next</Text>
-          </Pressable>
-        </View>
-      </ScrollView>
-    </Animated.View>
+      <View style={styles.contentContainer}>
+        
+        {/* --- Main Illustration --- */}
+        <Animated.View 
+          style={[
+            styles.imageContainer, 
+            { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }
+          ]}
+        >
+          <Image
+            source={{ uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/5rqezm7k_expires_30_days.png" }}
+            style={styles.mainImage}
+            resizeMode="contain"
+          />
+        </Animated.View>
+
+        {/* --- Text Content --- */}
+        <Animated.View 
+          style={[
+            styles.textContainer, 
+            { opacity: fadeAnim, transform: [{ translateY: slideUpAnim }] }
+          ]}
+        >
+          <Text style={styles.title}>Welcome to our app</Text>
+          <Text style={styles.subtitle}>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.
+          </Text>
+
+          {/* Pagination Dots (1st Active) */}
+          <View style={styles.paginationRow}>
+            <View style={[styles.dot, styles.activeDot]} />
+            <View style={styles.dot} />
+            <View style={styles.dot} />
+          </View>
+        </Animated.View>
+
+      </View>
+
+      {/* --- Footer Buttons --- */}
+      <View style={styles.footer}>
+        <TouchableOpacity onPress={handleSkip} style={styles.skipButton}>
+          <Text style={styles.skipText}>Skip</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={handleNext} style={styles.nextButton} activeOpacity={0.8}>
+          <Text style={styles.nextText}>Next</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -146,109 +132,94 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFFFFF",
   },
-  scrollView: {
+  bgDecoration: {
+    position: 'absolute',
+    top: 0,
+    width: width,
+    height: height * 0.5,
+    opacity: 0.3,
+  },
+  contentContainer: {
     flex: 1,
-    backgroundColor: "#00000000",
-    borderRadius: 40,
-  },
-  scrollViewContent: {
-    flexGrow: 1,
-  },
-  column: {
-    marginBottom: 63,
-  },
-  column2: {
-    alignItems: "center",
-    height: 300,
-  },
-  column3: {
-    borderRadius: 40,
-  },
-  image: {
-    borderRadius: 40,
-    height: 300,
-    marginTop: 99,
-    marginBottom: 125,
-    alignSelf: "center",
-    width: "100%",
-  },
-  text: {
-    color: "#000000",
-    fontSize: 32,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 16,
-    marginHorizontal: 31,
-  },
-  text2: {
-    color: "#000000",
-    fontSize: 16,
-    textAlign: "center",
-    marginBottom: 88,
-    marginHorizontal: 36,
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 7,
-    marginTop: -10,
-  },
-  box: {
-    width: 32,
-    height: 4,
-    backgroundColor: "#000000",
-    borderRadius: 2,
-    marginHorizontal: 6,
-  },
-  box2: {
-    width: 32,
-    height: 4,
-    backgroundColor: "#B50E00",
-    borderRadius: 2,
-    marginHorizontal: 6,
-  },
-  box3: {
-    width: 32,
-    height: 4,
-    backgroundColor: "#000000",
-    borderRadius: 2,
-    marginHorizontal: 6,
-  },
-  absoluteText: {
-    position: "absolute",
-    bottom: -420,
-    left: 44,
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 24,
-    backgroundColor: "#EFEFEF",
-    borderWidth: 1,
-    borderColor: "#CCCCCC",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
-    minWidth: 80,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  absoluteText2: {
-    position: "absolute",
-    bottom: -420,
-    right: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 24,
-    paddingVertical: 8,
-    borderRadius: 24,
-    backgroundColor: "#FFD700",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    minWidth: 80,
-    alignItems: "center",
-    justifyContent: "center",
   },
+  
+  // Image
+  imageContainer: {
+    marginBottom: 40,
+    shadowColor: "#FFDD32",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 15,
+    elevation: 10,
+  },
+  mainImage: {
+    width: width * 0.8,
+    height: width * 0.8,
+    maxWidth: 350,
+    maxHeight: 350,
+  },
+
+  // Typography
+  textContainer: { alignItems: 'center', width: '100%' },
+  title: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#1F2937",
+    textAlign: "center",
+    marginBottom: 12,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#6B7280",
+    textAlign: "center",
+    lineHeight: 24,
+    marginBottom: 30,
+    paddingHorizontal: 10,
+  },
+
+  // Pagination
+  paginationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#E5E7EB",
+    marginHorizontal: 6,
+  },
+  activeDot: {
+    width: 24,
+    backgroundColor: "#FFDD32", // Brand Yellow
+  },
+
+  // Footer
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 30,
+    paddingBottom: 40,
+    paddingTop: 20,
+  },
+  skipButton: { padding: 12 },
+  skipText: { fontSize: 16, fontWeight: "600", color: "#9CA3AF" },
+  
+  nextButton: {
+    backgroundColor: "#FFDD32",
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 25,
+    shadowColor: "#FFDD32",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  nextText: { fontSize: 16, fontWeight: "bold", color: "#000000" },
 });

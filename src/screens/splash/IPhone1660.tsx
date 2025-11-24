@@ -1,83 +1,173 @@
 import React, { useEffect, useRef } from "react";
-import { SafeAreaView, View, ScrollView, Image, Text, StyleSheet, Animated, Easing } from "react-native";
- 
-interface Props {
-  // Add any props if needed
-}
- 
+import { 
+  SafeAreaView, 
+  View, 
+  Image, 
+  Text, 
+  StyleSheet, 
+  Animated, 
+  Easing, 
+  StatusBar,
+  Dimensions 
+} from "react-native";
+
+const { width, height } = Dimensions.get("window");
+
+interface Props {}
+
 export default (props: Props) => {
+    // Animation Values
     const fadeAnim = useRef(new Animated.Value(0)).current;
-    const scaleAnim = useRef(new Animated.Value(0.95)).current;
- 
+    const scaleAnim = useRef(new Animated.Value(0.3)).current;
+    const textTranslateY = useRef(new Animated.Value(20)).current; // Text slides up
+    const textOpacity = useRef(new Animated.Value(0)).current;
+
     useEffect(() => {
-        Animated.parallel([
-            Animated.timing(fadeAnim, {
-                toValue: 1,
-                duration: 600,
-                easing: Easing.out(Easing.ease),
-                useNativeDriver: true,
-            }),
-            Animated.timing(scaleAnim, {
-                toValue: 1,
-                duration: 600,
-                easing: Easing.out(Easing.ease),
-                useNativeDriver: true,
-            }),
+        // 1. Animate Logo (Scale + Fade)
+        Animated.sequence([
+            Animated.parallel([
+                Animated.timing(fadeAnim, {
+                    toValue: 1,
+                    duration: 800,
+                    useNativeDriver: true,
+                }),
+                Animated.spring(scaleAnim, {
+                    toValue: 1,
+                    friction: 6,
+                    tension: 40,
+                    useNativeDriver: true,
+                }),
+            ]),
+            // 2. Animate Text (Slide Up + Fade)
+            Animated.parallel([
+                Animated.timing(textOpacity, {
+                    toValue: 1,
+                    duration: 600,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(textTranslateY, {
+                    toValue: 0,
+                    duration: 600,
+                    easing: Easing.out(Easing.ease),
+                    useNativeDriver: true,
+                }),
+            ])
         ]).start();
-    }, [fadeAnim, scaleAnim]);
- 
+    }, []);
+
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView  style={styles.scrollView}>
-                <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }] }>
+            <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+            
+            <View style={styles.contentContainer}>
+                {/* Animated Logo */}
+                <Animated.View 
+                    style={[
+                        styles.logoContainer, 
+                        { 
+                            opacity: fadeAnim, 
+                            transform: [{ scale: scaleAnim }] 
+                        }
+                    ]}
+                >
                     <Image
-                        source = {{uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/svoz6ch5_expires_30_days.png"}}
-                        resizeMode = {"stretch"}
+                        source={{ uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/svoz6ch5_expires_30_days.png" }}
+                        resizeMode="contain" // Changed to contain to prevent distortion
                         style={styles.image}
                     />
-                    <Text style={styles.text}>
-  ClicknBook{" "}
-  <Text style={styles.blueText}>Home</Text>
-</Text>
- 
                 </Animated.View>
-            </ScrollView>
+
+                {/* Animated Text Group */}
+                <Animated.View 
+                    style={[
+                        styles.textContainer, 
+                        { 
+                            opacity: textOpacity, 
+                            transform: [{ translateY: textTranslateY }] 
+                        }
+                    ]}
+                >
+                    <Text style={styles.titleText}>
+                        ClicknBook <Text style={styles.brandText}>Home</Text>
+                    </Text>
+                    
+                    {/* Modern Tagline */}
+                    <Text style={styles.tagline}>
+                        Find your perfect stay
+                    </Text>
+                </Animated.View>
+            </View>
+
+            {/* Optional: Bottom Footer/Version */}
+            <View style={styles.footer}>
+                <View style={styles.loadingLine} />
+            </View>
         </SafeAreaView>
-    )
+    );
 }
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#FFFFFF",
     },
-    image: {
-        borderRadius: 40,
-        height: 339,
-        marginTop: 214,
-        marginBottom: 81,
-        width:380
-    },
-    scrollView: {
+    contentContainer: {
         flex: 1,
-        backgroundColor: "#00000000",
-        borderRadius: 40,
+        justifyContent: "center",
+        alignItems: "center",
+        paddingHorizontal: 20,
     },
-    content: {
+    logoContainer: {
+        shadowColor: "#FFDD32",
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.2,
+        shadowRadius: 20,
+        elevation: 10, // Android shadow
+        marginBottom: 30,
+    },
+    image: {
+        width: width * 0.8, // Responsive width (80% of screen)
+        height: width * 0.7, // Keep aspect ratio
+        maxWidth: 350,
+        maxHeight: 300,
+    },
+    textContainer: {
         alignItems: "center",
     },
-    text: {
-      color: "#111827",
-      fontSize: 30,
-      fontWeight: "700",
-      textAlign: "center",
-      letterSpacing: 0.5,
-      marginTop: 8,
-      marginBottom: 140,
+    titleText: {
+        color: "#1F2937", // Dark Grey/Black
+        fontSize: 32,
+        fontWeight: "800",
+        textAlign: "center",
+        letterSpacing: 0.5,
     },
-    blueText: {
-      color: "#2563EB",
-      fontSize: 28,
-      fontWeight: "700",
+    brandText: {
+        color: "#FFDD32", // Your App's Brand Yellow
+        fontSize: 32,
+        fontWeight: "800",
+        // Text Stroke/Shadow for readability if on white
+        textShadowColor: 'rgba(0, 0, 0, 0.1)',
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 1,
     },
+    tagline: {
+        marginTop: 10,
+        color: "#9CA3AF", // Cool Grey
+        fontSize: 16,
+        fontWeight: "500",
+        letterSpacing: 1.2,
+        textTransform: 'uppercase'
+    },
+    footer: {
+        position: 'absolute',
+        bottom: 50,
+        alignItems: 'center',
+        width: '100%'
+    },
+    loadingLine: {
+        width: 40,
+        height: 4,
+        backgroundColor: '#FFDD32',
+        borderRadius: 2
+    }
 });
- 

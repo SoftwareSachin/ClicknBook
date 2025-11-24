@@ -1,92 +1,118 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { 
   SafeAreaView, 
   View, 
-  ImageBackground, 
   ScrollView, 
   Text, 
   TouchableOpacity, 
   Image, 
-  StyleSheet,
-  GestureResponderEvent,
-  StatusBar 
+  StyleSheet, 
+  StatusBar,
+  Dimensions,
+  Animated,
+  Easing
 } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../../navigation/types';
 
-interface ThankYouProps {
-  // Props can be added here if needed in the future
-}
+const { width, height } = Dimensions.get('window');
+
+// --- MODERN ASSETS ---
+const ASSETS = {
+    // High Quality 3D Success Render
+    success3D: "https://cdn-icons-png.flaticon.com/512/7518/7518748.png", 
+    // Subtle confetti or decoration can be added here if needed
+    homeIcon: "https://cdn-icons-png.flaticon.com/512/1946/1946436.png",
+};
+
+interface ThankYouProps {}
 
 const ThankYou: React.FC<ThankYouProps> = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
   
+  // --- Animations ---
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.5)).current;
+  const slideUpAnim = useRef(new Animated.Value(50)).current;
+
+  useEffect(() => {
+    Animated.sequence([
+      // 1. Icon Pop In
+      Animated.parallel([
+        Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
+        Animated.spring(scaleAnim, { toValue: 1, friction: 6, tension: 40, useNativeDriver: true }),
+      ]),
+      // 2. Text Slide Up
+      Animated.timing(slideUpAnim, {
+        toValue: 0,
+        duration: 600,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      })
+    ]).start();
+  }, []);
+
   const handleBackToHome = () => {
-    // Navigate to HomeRent and reset the navigation stack
     navigation.reset({
       index: 0,
       routes: [{ name: 'HomeRent' }],
     });
   };
+
   return (
-    <>
-      {/* 1. Top Safe Area: Yellow Background for Status Bar */}
-      <SafeAreaView style={{ flex: 0, backgroundColor: "#FFDD32" }} />
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-      {/* 2. Main Safe Area: White Background */}
-      <SafeAreaView style={styles.container}>
+      <View style={styles.contentContainer}>
         
-        {/* 3. Status Bar Config */}
-        <StatusBar barStyle="dark-content" backgroundColor="#FFDD32" />
-
-        <ImageBackground 
-          source={{ uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/rqafi1iv_expires_30_days.png" }} 
-          resizeMode="stretch"
-          style={styles.view}
+        <ScrollView 
+            contentContainerStyle={styles.scrollContent} 
+            showsVerticalScrollIndicator={false}
         >
-          <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
             
-            {/* Main Title */}
-            <Text style={styles.titleText}>
-              Thank You for Contacting ClicknBook Home!
-            </Text>
+            {/* --- 1. Animated Success Icon --- */}
+            <Animated.View style={[styles.iconContainer, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}>
+                <Image 
+                    source={{ uri: ASSETS.success3D }} 
+                    style={styles.successImage} 
+                    resizeMode="contain"
+                />
+                {/* Subtle Shadow Blob */}
+                <View style={styles.shadowBlob} />
+            </Animated.View>
 
-            {/* Fixed Description Text */}
-            <View style={styles.view2}>
-              <Text style={styles.bodyText}>
-                We've received your details successfully.{"\n\n"}
-                Our team will get in touch with you soon to assist you further.{"\n\n"}
-                We appreciate your interest in listing your property with us!
-              </Text>
-            </View>
+            {/* --- 2. Dynamic Text Content --- */}
+            <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideUpAnim }] }}>
+                <Text style={styles.titleText}>Request Received!</Text>
+                
+                <Text style={styles.subtitleText}>
+                    Thank you for choosing <Text style={styles.brandText}>ClicknBook</Text>.
+                </Text>
 
-            {/* Back to Home Button */}
+                <View style={styles.cardMessage}>
+                    <Text style={styles.bodyText}>
+                        We have received your details successfully. Our expert team will review your property and get in touch with you shortly.
+                    </Text>
+                </View>
+            </Animated.View>
+
+        </ScrollView>
+
+        {/* --- 3. Bottom Floating Button --- */}
+        <Animated.View style={[styles.footer, { opacity: fadeAnim, transform: [{ translateY: slideUpAnim }] }]}>
             <TouchableOpacity 
-              style={styles.buttonRow} 
-              onPress={handleBackToHome}
+                style={styles.primaryButton} 
+                onPress={handleBackToHome}
+                activeOpacity={0.9}
             >
-              <Text style={styles.buttonText}>Back to Home</Text>
-              <Image
-                source={{ uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/5j2gzz5b_expires_30_days.png" }} 
-                resizeMode="stretch"
-                style={styles.arrowIcon}
-              />
+                <Text style={styles.buttonText}>Back to Home</Text>
+                <Image source={{ uri: ASSETS.homeIcon }} style={styles.btnIcon} />
             </TouchableOpacity>
+        </Animated.View>
 
-            {/* Bottom Illustration */}
-            <View style={styles.illustrationContainer}>
-              <Image
-                source={{ uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/afejr9ij_expires_30_days.png" }} 
-                resizeMode="stretch"
-                style={styles.illustration}
-              />
-            </View>
-
-          </ScrollView>
-        </ImageBackground>
-      </SafeAreaView>
-    </>
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -95,75 +121,107 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFFFFF",
   },
-  view: {
+  contentContainer: {
     flex: 1,
-    width: '100%',
-    height: '100%',
-  },
-  scrollView: {
-    flex: 1,
+    justifyContent: 'space-between',
   },
   scrollContent: {
-    paddingTop: 80, 
-    paddingBottom: 40,
+    alignItems: 'center',
+    paddingTop: height * 0.1, // Push content down visually
+    paddingHorizontal: 30,
   },
+
+  // --- Icon Styling ---
+  iconContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 40,
+    position: 'relative',
+  },
+  successImage: {
+    width: 180,
+    height: 180,
+    zIndex: 2,
+  },
+  shadowBlob: {
+    position: 'absolute',
+    bottom: -10,
+    width: 100,
+    height: 20,
+    backgroundColor: '#000',
+    opacity: 0.05,
+    borderRadius: 50,
+    transform: [{ scaleX: 1.5 }]
+  },
+
+  // --- Typography ---
   titleText: {
-    color: "#000000",
-    fontSize: 32, // Slightly adjusted for better fit
-    fontWeight: "bold",
+    fontSize: 32,
+    fontWeight: "900",
+    color: "#1F2937",
+    textAlign: "center",
+    marginBottom: 10,
+    letterSpacing: 0.5,
+  },
+  subtitleText: {
+    fontSize: 18,
+    color: "#4B5563",
     textAlign: "center",
     marginBottom: 30,
-    marginHorizontal: 20,
-    lineHeight: 40,
+    fontWeight: '500',
   },
-  view2: {
-    alignItems: "center",
-    marginBottom: 40,
-    paddingHorizontal: 20,
+  brandText: {
+    color: "#F59E0B", // Darker yellow/orange for text readability
+    fontWeight: "bold",
+  },
+  
+  // --- Message Card ---
+  cardMessage: {
+      backgroundColor: '#F9FAFB',
+      padding: 20,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: '#F3F4F6',
   },
   bodyText: {
-    color: "#666", // Softer grey for body text
-    fontSize: 16,
+    fontSize: 15,
+    color: "#6B7280",
     textAlign: "center",
-    width: '90%',
-    lineHeight: 24, // Better line spacing for readability
-    fontWeight: "500",
+    lineHeight: 24,
   },
-  buttonRow: {
+
+  // --- Footer / Button ---
+  footer: {
+      paddingHorizontal: 24,
+      paddingBottom: 40,
+      paddingTop: 20,
+      backgroundColor: '#FFF',
+  },
+  primaryButton: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F8D800", 
-    borderRadius: 12,
-    paddingVertical: 16,
-    marginBottom: 40,
-    marginHorizontal: 24,
-    elevation: 3, // Android Shadow
-    shadowColor: "#000", // iOS Shadow
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    backgroundColor: "#FFDD32", 
+    borderRadius: 16,
+    paddingVertical: 18,
+    elevation: 8, 
+    shadowColor: "#FFDD32", 
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 15,
   },
   buttonText: {
     color: "#000000",
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
-    marginRight: 12,
+    marginRight: 10,
+    letterSpacing: 0.5
   },
-  arrowIcon: {
-    borderRadius: 10,
-    width: 20,
-    height: 20,
-  },
-  illustrationContainer: {
-    alignItems: "flex-end",
-    marginTop: 10,
-  },
-  illustration: {
-    borderRadius: 40,
-    width: 323,
-    height: 207,
-  },
+  btnIcon: {
+      width: 20,
+      height: 20,
+      tintColor: '#000'
+  }
 });
 
 export default ThankYou;

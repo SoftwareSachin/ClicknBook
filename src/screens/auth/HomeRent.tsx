@@ -1,7 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { AuthStackParamList } from '../../navigation/types';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   SafeAreaView,
   View,
@@ -10,682 +7,611 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
-  KeyboardAvoidingView,
-  Platform,
-  FlatList,
   StyleSheet,
   Dimensions,
-  Alert,
   StatusBar,
+  Platform,
+  FlatList,
+  Alert,
   Modal,
+  ActivityIndicator,
+  RefreshControl
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
-// --- STYLES ---
-const homeStyles = StyleSheet.create({
-  yellowHeader: { width: '100%', height: 20, backgroundColor: "#FFDD32", marginBottom: 10 },
-  bottomNav: {
-    position: 'absolute', bottom: 0, left: 0, width: width, backgroundColor: "#FFDD32", borderTopLeftRadius: 24, borderTopRightRadius: 24, flexDirection: "row", paddingHorizontal: 10, paddingVertical: 12, alignItems: "center", justifyContent: "space-between", shadowColor: "#000", shadowOffset: { width: 0, height: -2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 5, paddingBottom: Platform.OS === 'ios' ? 20 : 12 
-  },
-  navItem: { flex: 1, alignItems: "center", justifyContent: 'center', height: 50 },
-  greetingRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 27, marginHorizontal: 16 },
-  actionRow: { flexDirection: "row", marginBottom: 24, marginHorizontal: 16 },
-  filterBtn: { flex: 1, alignItems: "center", borderColor: "#FFDD32", borderRadius: 10, borderWidth: 1, paddingVertical: 8, marginRight: 18, justifyContent: "center" },
-  filterIcon: { width: 24, height: 24, marginBottom: 5, borderRadius: 10 },
-  searchBar: { flexDirection: "row", alignItems: "center", borderColor: "#979797", borderRadius: 20, borderWidth: 1, marginBottom: 24, marginHorizontal: 16, backgroundColor: "#fff", height: 50 },
-  sectionHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8, marginRight: 23 },
-  sectionTitle: { color: "#000000", fontSize: 14, fontWeight: "bold" },
-  seeAll: { color: "#FFDD32", fontSize: 14, fontWeight: "bold" },
-  propertyCard: { borderColor: "#ddd", borderRadius: 20, borderWidth: 1, paddingHorizontal: 0, marginRight: 17, width: 200, backgroundColor: "#fff", paddingBottom: 10, overflow: 'hidden', shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3, elevation: 3 },
-  propertyImage: { width: '100%', height: 120, marginBottom: 8 },
-  cardPrice: { color: "#000000", fontSize: 14, fontWeight: "bold", marginBottom: 2, marginHorizontal: 10 },
-  cardTitle: { color: "#000000", fontSize: 12, fontWeight: "bold", marginBottom: 2, marginHorizontal: 10 },
-  cardLocation: { color: "#666", fontSize: 12, marginBottom: 5, marginHorizontal: 10 },
-  localityCard: { flexDirection: "row", alignItems: "center", borderColor: "#ddd", borderRadius: 20, borderWidth: 1, padding: 12, marginRight: 15, backgroundColor: "#fff", width: 280, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3, elevation: 3 },
-  localityImage: { borderRadius: 12, width: 75, height: 83, marginRight: 10 },
-  ratingContainer: { flexDirection: "row", alignItems: "center", marginBottom: 2 },
-  readReviewBtn: { flexDirection: "row", alignItems: "center", marginTop: 4 },
-  typeCard: { alignItems: 'center', justifyContent: 'center', marginRight: 12, width: 90 },
-  typeIconContainer: { width: 70, height: 70, backgroundColor: '#FFF', borderRadius: 16, justifyContent: 'center', alignItems: 'center', marginBottom: 8, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3, borderWidth: 1, borderColor: '#F0F0F0' },
-  typeIcon: { width: 32, height: 32 },
-  typeText: { fontSize: 11, fontWeight: '600', color: '#333', textAlign: 'center' }
-});
-
-const profileStyles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  card: {
-    width: '90%',
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 20,
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15
-  },
-  headerTitle: { 
-    fontSize: 18, 
-    fontWeight: 'bold', 
-    color: '#000' 
-  },
-  closeButton: { 
-    padding: 8, 
-    borderRadius: 20, 
-    backgroundColor: '#f0f0f0' 
-  },
-  divider: { 
-    height: 1, 
-    backgroundColor: '#eee', 
-    marginBottom: 15 
-  },
-  profileHeader: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    marginBottom: 20 
-  },
-  avatar: { 
-    width: 60, 
-    height: 60, 
-    borderRadius: 30, 
-    marginRight: 15 
-  },
-  userName: { 
-    fontSize: 20, 
-    fontWeight: 'bold', 
-    color: '#000' 
-  },
-  infoSection: { 
-    marginTop: 5 
-  },
-  infoTitle: { 
-    fontSize: 16, 
-    fontWeight: 'bold', 
-    color: '#555', 
-    marginBottom: 15 
-  },
-  infoRow: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    marginBottom: 12 
-  },
-  infoIcon: { 
-    width: 20, 
-    height: 20, 
-    marginRight: 12, 
-    tintColor: '#FFDD32' 
-  },
-  infoText: { 
-    fontSize: 14, 
-    color: '#333' 
-  }
-});
-
-// --- 1. Interfaces & Types ---
-
-interface PropertyData {
-  id: string;
-  imageUri: string;
-  price: string;
-  title: string;
-  location: string;
-}
-
-interface LocalityData {
-  id: string;
-  imageUri: string;
-  locality: string;
-  ratingText: string;
-  pricePerSqFt: string;
-}
-
-interface PropertyType {
+// --- 1. TYPES & INTERFACES (Backend Contract) ---
+interface UserProfile {
     id: string;
     name: string;
-    iconUri: string;
+    email: string;
+    phone: string;
+    avatar: string;
+    isPremium: boolean;
 }
 
-interface HomeContentProps {
-    onProfilePress: () => void;
-    onNotificationPress: () => void;
-    onSeeAllTypes: () => void;
+interface Category {
+    id: string;
+    name: string;
+    icon: string;
 }
 
-interface ProfileModalProps {
-    visible: boolean;
-    onClose: () => void;
+interface Property {
+    id: string;
+    title: string;
+    location: string;
+    price: string; // e.g., "40k"
+    rating: number;
+    type: string; // "Apartment", "Villa", etc.
+    isFeatured: boolean;
+    image: string;
+    specs?: { beds: number; baths: number; sqft: number };
 }
 
-// --- 2. DATA ---
+// --- 2. MOCK BACKEND SERVICE (Replace with real API calls) ---
+const MockAPI = {
+    getUser: async (): Promise<UserProfile> => {
+        return new Promise((resolve) => {
+            setTimeout(() => resolve({
+                id: 'u1',
+                name: 'Zenab Vxuh',
+                email: 'zenab@example.com',
+                phone: '+91 98765 43210',
+                avatar: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=250&auto=format&fit=crop",
+                isPremium: true
+            }), 1000);
+        });
+    },
+    getCategories: async (): Promise<Category[]> => {
+        return [
+            { id: '1', name: 'All', icon: "https://cdn-icons-png.flaticon.com/512/561/561169.png" },
+            { id: '2', name: 'Apartment', icon: "https://cdn-icons-png.flaticon.com/512/1018/1018573.png" },
+            { id: '3', name: 'House', icon: "https://cdn-icons-png.flaticon.com/512/609/609803.png" },
+            { id: '4', name: 'Villa', icon: "https://cdn-icons-png.flaticon.com/512/2230/2230477.png" },
+            { id: '5', name: 'Single Room', icon: "https://cdn-icons-png.flaticon.com/512/3030/3030336.png" },
+            { id: '6', name: 'Studio', icon: "https://cdn-icons-png.flaticon.com/512/2413/2413056.png" },
+        ];
+    },
+    getProperties: async (): Promise<Property[]> => {
+        return new Promise((resolve) => {
+            setTimeout(() => resolve([
+                {
+                    id: "1",
+                    title: "Kdms Skywalk",
+                    location: "Jaipur, Rajasthan",
+                    price: "40k",
+                    rating: 4.8,
+                    type: "Apartment",
+                    isFeatured: true,
+                    image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                },
+                {
+                    id: "2",
+                    title: "Royal Villas",
+                    location: "Vaishali Nagar",
+                    price: "85k",
+                    rating: 4.9,
+                    type: "Villa",
+                    isFeatured: true,
+                    image: "https://images.unsplash.com/photo-1613977257363-707ba9348227?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                },
+                {
+                    id: "3",
+                    title: "Modern Studio",
+                    location: "Malviya Nagar",
+                    price: "15k",
+                    rating: 4.5,
+                    type: "Studio",
+                    isFeatured: false,
+                    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                    specs: { beds: 1, baths: 1, sqft: 650 }
+                },
+                {
+                    id: "4",
+                    title: "Green Cottage",
+                    location: "C-Scheme",
+                    price: "25k",
+                    rating: 4.7,
+                    type: "House",
+                    isFeatured: false,
+                    image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                    specs: { beds: 2, baths: 2, sqft: 1200 }
+                },
+                {
+                    id: "5",
+                    title: "Urban Heights",
+                    location: "Jagatpura",
+                    price: "32k",
+                    rating: 4.6,
+                    type: "Apartment",
+                    isFeatured: false,
+                    image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                    specs: { beds: 3, baths: 2, sqft: 1500 }
+                }
+            ]), 1500); // Simulated Network Delay
+        });
+    }
+};
 
-const PROPERTY_TYPES: PropertyType[] = [
-    { id: '1', name: 'Apartment', iconUri: 'https://cdn-icons-png.flaticon.com/512/1018/1018573.png' },
-    { id: '2', name: 'Houses', iconUri: 'https://cdn-icons-png.flaticon.com/512/609/609803.png' },
-    { id: '3', name: 'Villa', iconUri: 'https://cdn-icons-png.flaticon.com/512/2230/2230477.png' },
-    { id: '4', name: 'Duplex', iconUri: 'https://cdn-icons-png.flaticon.com/512/263/263115.png' },
-    { id: '5', name: 'Studios', iconUri: 'https://cdn-icons-png.flaticon.com/512/2413/2413056.png' },
-    { id: '6', name: 'Single Room', iconUri: 'https://cdn-icons-png.flaticon.com/512/3030/3030336.png' },
-    { id: '7', name: 'Plot', iconUri: 'https://cdn-icons-png.flaticon.com/512/9432/9432884.png' },
-    { id: '8', name: 'Office', iconUri: 'https://cdn-icons-png.flaticon.com/512/709/709699.png' },
-];
+// --- ASSETS (Static Icons) ---
+const ICONS = {
+    notification: "https://cdn-icons-png.flaticon.com/512/3602/3602145.png",
+    search: "https://cdn-icons-png.flaticon.com/512/54/54481.png",
+    verified: "https://cdn-icons-png.flaticon.com/512/7595/7595571.png",
+    filter: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/kwi0sLffHL/2vrimqtw_expires_30_days.png",
+    sort: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/kwi0sLffHL/91dq2k06_expires_30_days.png",
+    map: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/kwi0sLffHL/lecyldks_expires_30_days.png",
+    pin: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
+    star: "https://cdn-icons-png.flaticon.com/512/1828/1828884.png",
+    heart: "https://cdn-icons-png.flaticon.com/512/833/833472.png",
+    bed: "https://cdn-icons-png.flaticon.com/512/3030/3030336.png",
+    bath: "https://cdn-icons-png.flaticon.com/512/2423/2423830.png",
+    area: "https://cdn-icons-png.flaticon.com/512/3595/3595969.png",
+    home: "https://cdn-icons-png.flaticon.com/512/1946/1946436.png",
+    list: "https://cdn-icons-png.flaticon.com/512/2910/2910791.png",
+    heartNav: "https://cdn-icons-png.flaticon.com/512/1077/1077035.png",
+    pay: "https://cdn-icons-png.flaticon.com/512/272/272525.png",
+    userNav: "https://cdn-icons-png.flaticon.com/512/1077/1077114.png",
+};
 
-const INITIAL_PROJECTS: PropertyData[] = [
-  {
-    id: "1",
-    imageUri: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=400&auto=format&fit=crop",
-    price: "₹ 1 Cr-2.5 Cr",
-    title: "Kdms Skywalk",
-    location: "Nh-8 Jaipur, Jaipur",
-  },
-  {
-    id: "2",
-    imageUri: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=400&auto=format&fit=crop",
-    price: "₹ 50L - 80L",
-    title: "Royal Residency",
-    location: "Mansarovar, Jaipur",
-  },
-  {
-    id: "3",
-    imageUri: "https://images.unsplash.com/photo-1600596542815-60002d23966d?q=80&w=400&auto=format&fit=crop",
-    price: "₹ 2 Cr+",
-    title: "Luxury Heights",
-    location: "Vaishali Nagar, Jaipur",
-  },
-];
+// --- UI COMPONENTS ---
 
-const INITIAL_LOCALITIES: LocalityData[] = [
-  {
-    id: "1",
-    imageUri: "https://images.unsplash.com/photo-1449844908441-8829872d2607?q=80&w=400&auto=format&fit=crop",
-    locality: "Mansarovar",
-    ratingText: "4.8 (85 Ratings)",
-    pricePerSqFt: "₹10.5K/sq.ft.",
-  },
-  {
-    id: "2",
-    imageUri: "https://images.unsplash.com/photo-1519999482648-25049ddd37b1?q=80&w=400&auto=format&fit=crop",
-    locality: "Jagatpura",
-    ratingText: "4.6 (120 Ratings)",
-    pricePerSqFt: "₹8.2K/sq.ft.",
-  },
-  {
-    id: "3",
-    imageUri: "https://images.unsplash.com/photo-1512453979798-5ea904f47f45?q=80&w=400&auto=format&fit=crop",
-    locality: "Vaishali Nagar",
-    ratingText: "4.9 (200 Ratings)",
-    pricePerSqFt: "₹12.5K/sq.ft.",
-  },
-];
-
-// --- 3. Reusable UI Components ---
-
-const PropertyTypeCard = ({ item, onPress }: { item: PropertyType, onPress: () => void }) => (
-    <TouchableOpacity style={homeStyles.typeCard} onPress={onPress}>
-        <View style={homeStyles.typeIconContainer}>
-            <Image source={{ uri: item.iconUri }} style={homeStyles.typeIcon} resizeMode="contain" />
+const SmartImage = ({ source, style, resizeMode = "cover" }: any) => {
+    const [loading, setLoading] = useState(true);
+    return (
+        <View style={[style, { overflow: 'hidden', backgroundColor: '#E0E0E0', justifyContent: 'center', alignItems: 'center' }]}>
+            <Image
+                source={source}
+                style={[StyleSheet.absoluteFill, style]}
+                resizeMode={resizeMode}
+                onLoadEnd={() => setLoading(false)}
+            />
+            {loading && <ActivityIndicator color="#AAA" size="small" />}
         </View>
-        <Text style={homeStyles.typeText}>{item.name}</Text>
+    );
+};
+
+const CategoryItem = ({ item, isActive, onPress }: { item: Category, isActive: boolean, onPress: () => void }) => (
+    <TouchableOpacity 
+        style={[styles.catItem, isActive && styles.catItemActive]} 
+        onPress={onPress}
+        activeOpacity={0.7}
+    >
+        <View style={[styles.catIconContainer, isActive && styles.catIconContainerActive]}>
+            <Image source={{ uri: item.icon }} style={styles.catIcon} resizeMode="contain" />
+        </View>
+        <Text style={[styles.catText, isActive && styles.catTextActive]}>{item.name}</Text>
     </TouchableOpacity>
 );
 
-const Rating = ({ ratingText }: { ratingText: string }) => (
-  <View style={homeStyles.ratingContainer}>
-    <Image
-      source={{ uri: "https://cdn-icons-png.flaticon.com/512/1828/1828884.png" }}
-      style={{ width: 16, height: 16, marginRight: 6, tintColor: '#FFDD32' }}
-    />
-    <Text style={{ color: "#FFDD32", fontSize: 14, fontWeight: '600' }}>{ratingText}</Text>
-  </View>
-);
-
-const PropertyCard = ({ item }: { item: PropertyData }) => (
-  <TouchableOpacity style={homeStyles.propertyCard} onPress={() => Alert.alert("Property", item.title)}>
-    <Image
-      source={{ uri: item.imageUri }}
-      resizeMode="cover"
-      style={homeStyles.propertyImage}
-    />
-    <Text style={homeStyles.cardPrice}>{item.price}</Text>
-    <Text style={homeStyles.cardTitle}>{item.title}</Text>
-    <Text style={homeStyles.cardLocation}>{item.location}</Text>
-  </TouchableOpacity>
-);
-
-const LocalityCard = ({ item }: { item: LocalityData }) => (
-  <View style={homeStyles.localityCard}>
-    <Image
-      source={{ uri: item.imageUri }}
-      resizeMode="cover"
-      style={homeStyles.localityImage}
-    />
-    <View style={{ flex: 1 }}>
-      <Text style={homeStyles.cardTitle}>{item.locality}</Text>
-      <Rating ratingText={item.ratingText} />
-      <Text style={homeStyles.cardLocation}>{item.pricePerSqFt}</Text>
-      <TouchableOpacity style={homeStyles.readReviewBtn} onPress={() => Alert.alert("Reviews", item.locality)}>
-        <Text style={{ color: "#FFDD32", fontSize: 14, marginRight: 3 }}>Read all reviews</Text>
-        <Image
-          source={{ uri: "https://cdn-icons-png.flaticon.com/512/271/271228.png" }}
-          style={{ width: 14, height: 14, tintColor: '#FFDD32' }}
-        />
-      </TouchableOpacity>
-    </View>
-  </View>
-);
-
-const FilterSortMapButton = ({ label, iconUri, onPress }: { label: string, iconUri: string, onPress: () => void }) => (
-  <TouchableOpacity style={homeStyles.filterBtn} onPress={onPress}>
-    <Image source={{ uri: iconUri }} resizeMode="stretch" style={homeStyles.filterIcon} />
-    <Text style={{ color: "#000000", fontSize: 12 }}>{label}</Text>
-  </TouchableOpacity>
-);
-
-// --- 4. POPUP COMPONENTS ---
-
-// NEW: Profile Modal Component
-const ProfileModal = ({ visible, onClose }: ProfileModalProps) => {
-    return (
-        <Modal
-            animationType="fade"
-            transparent={true}
-            visible={visible}
-            onRequestClose={onClose}
-        >
-            <View style={profileStyles.overlay}>
-                <View style={profileStyles.card}>
-                    
-                    {/* Header with Close Button */}
-                    <View style={profileStyles.headerRow}>
-                        <Text style={profileStyles.headerTitle}>Your Profile</Text>
-                        <TouchableOpacity onPress={onClose} style={profileStyles.closeButton}>
-                             <Image 
-                                source={{ uri: "https://cdn-icons-png.flaticon.com/512/1828/1828774.png" }} 
-                                style={{ width: 14, height: 14, tintColor: '#555' }} 
-                             />
-                        </TouchableOpacity>
-                    </View>
-
-                    <View style={profileStyles.divider} />
-
-                    {/* Profile Image & Name */}
-                    <View style={profileStyles.profileHeader}>
-                         <Image
-                            source={{ uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/cg8wzhtu_expires_30_days.png" }}
-                            style={profileStyles.avatar}
-                            resizeMode="stretch"
-                        />
-                        <Text style={profileStyles.userName}>Zenab Vxuh</Text>
-                    </View>
-
-                    {/* Info Section */}
-                    <View style={profileStyles.infoSection}>
-                         <Text style={profileStyles.infoTitle}>Personal Information</Text>
-                         
-                         {/* Rows */}
-                         <View style={profileStyles.infoRow}>
-                            <Image source={{ uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/slok695z_expires_30_days.png" }} style={profileStyles.infoIcon} />
-                            <Text style={profileStyles.infoText}>998765XXX</Text>
-                         </View>
-
-                         <View style={profileStyles.infoRow}>
-                            <Image source={{ uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/711kuhn8_expires_30_days.png" }} style={profileStyles.infoIcon} />
-                            <Text style={profileStyles.infoText}>XYZ@gmail.com</Text>
-                         </View>
-
-                         <View style={profileStyles.infoRow}>
-                            <Image source={{ uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/fxq8h3wv_expires_30_days.png" }} style={profileStyles.infoIcon} />
-                            <Text style={profileStyles.infoText}>15 Dec 1987</Text>
-                         </View>
-
-                         <View style={profileStyles.infoRow}>
-                            <Image source={{ uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/buug82qi_expires_30_days.png" }} style={profileStyles.infoIcon} />
-                            <Text style={profileStyles.infoText}>Female</Text>
-                         </View>
-
-                         <View style={profileStyles.infoRow}>
-                            <Image source={{ uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/nbnqxw5h_expires_30_days.png" }} style={profileStyles.infoIcon} />
-                            <Text style={profileStyles.infoText}>Malviya Nagar, Jaipur</Text>
-                         </View>
-                    </View>
-                </View>
+const FeaturedCard = ({ item, onPress }: { item: Property, onPress: (id: string) => void }) => (
+    <TouchableOpacity style={styles.featuredCard} activeOpacity={0.95} onPress={() => onPress(item.id)}>
+        <SmartImage source={{ uri: item.image }} style={styles.featuredImage} />
+        <View style={styles.featuredTag}><Text style={styles.featuredTagText}>Featured</Text></View>
+        <View style={styles.featuredOverlay}>
+            <Text style={styles.featuredTitle} numberOfLines={1}>{item.title}</Text>
+            <View style={styles.rowCenter}>
+                <Image source={{ uri: ICONS.pin }} style={styles.pinIconWhite} />
+                <Text style={styles.featuredLoc} numberOfLines={1}>{item.location}</Text>
             </View>
+            <View style={styles.rowSpace}>
+                <Text style={styles.featuredPrice}>₹{item.price}/mo</Text>
+                <View style={styles.ratingBadge}><Text style={styles.ratingText}>★ {item.rating}</Text></View>
+            </View>
+        </View>
+    </TouchableOpacity>
+);
+
+const NearbyCard = ({ item, onPress }: { item: Property, onPress: (id: string) => void }) => (
+    <TouchableOpacity style={styles.nearbyCard} activeOpacity={0.9} onPress={() => onPress(item.id)}>
+        <View style={styles.nearbyImageContainer}>
+            <SmartImage source={{ uri: item.image }} style={styles.nearbyImage} />
+            <View style={styles.nearbyRatingBadge}>
+                <Image source={{ uri: ICONS.star }} style={styles.tinyStar} />
+                <Text style={styles.tinyRatingText}>{item.rating}</Text>
+            </View>
+        </View>
+        <View style={styles.nearbyContent}>
+            <View style={styles.rowSpace}>
+                <Text style={styles.nearbyTitle} numberOfLines={1}>{item.title}</Text>
+                <Image source={{ uri: ICONS.heart }} style={{ width: 18, height: 18, tintColor: '#CCC' }} />
+            </View>
+            <View style={[styles.rowCenter, { marginTop: 4, marginBottom: 8 }]}>
+                <Image source={{ uri: ICONS.pin }} style={styles.pinIconSmall} />
+                <Text style={styles.nearbyLoc} numberOfLines={1}>{item.location}</Text>
+            </View>
+            {item.specs && (
+                <View style={styles.featureRow}>
+                    <View style={styles.featureItem}><Image source={{ uri: ICONS.bed }} style={styles.featureIcon} /><Text style={styles.featureText}>{item.specs.beds} Beds</Text></View>
+                    <View style={styles.featureItem}><Image source={{ uri: ICONS.bath }} style={styles.featureIcon} /><Text style={styles.featureText}>{item.specs.baths} Bath</Text></View>
+                    <View style={styles.featureItem}><Image source={{ uri: ICONS.area }} style={styles.featureIcon} /><Text style={styles.featureText}>{item.specs.sqft} ft²</Text></View>
+                </View>
+            )}
+            <View style={styles.separator} />
+            <View style={styles.rowSpace}>
+                <Text style={styles.nearbyPrice}>₹{item.price}<Text style={styles.perMonth}>/mo</Text></Text>
+                <View style={styles.viewDetailsBtn}><Text style={styles.viewDetailsText}>View</Text></View>
+            </View>
+        </View>
+    </TouchableOpacity>
+);
+
+const ActionButton = ({ label, icon, onPress }: any) => (
+    <TouchableOpacity style={styles.actionBtn} onPress={onPress} activeOpacity={0.8}>
+        <Image source={{ uri: icon }} style={styles.actionIcon} resizeMode="contain" />
+        <Text style={styles.actionLabel}>{label}</Text>
+    </TouchableOpacity>
+);
+
+const ProfileModal = ({ visible, onClose, user, navigation }: any) => {
+    if (!user) return null;
+    return (
+        <Modal animationType="fade" transparent={true} visible={visible} onRequestClose={onClose}>
+            <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={onClose}>
+                <View style={styles.modalCard}>
+                    <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
+                        <Text style={{fontSize: 20, color: '#AAA', fontWeight: 'bold'}}>✕</Text>
+                    </TouchableOpacity>
+                    <View style={styles.modalHeader}>
+                        <View style={styles.avatarContainer}>
+                            <SmartImage source={{ uri: user.avatar }} style={styles.modalAvatar} />
+                            {user.isPremium && <View style={styles.verifiedBadge}><Image source={{ uri: ICONS.verified }} style={{width: 14, height: 14, tintColor: '#FFF'}} /></View>}
+                        </View>
+                        <Text style={styles.modalName}>{user.name}</Text>
+                        <Text style={styles.modalRole}>{user.isPremium ? 'Premium Member' : 'Standard Member'}</Text>
+                    </View>
+                    <View style={styles.divider} />
+                    <View style={styles.infoRow}><Text style={styles.infoLabel}>Email:</Text><Text style={styles.infoValue}>{user.email}</Text></View>
+                    <View style={styles.infoRow}><Text style={styles.infoLabel}>Phone:</Text><Text style={styles.infoValue}>{user.phone}</Text></View>
+                    <TouchableOpacity style={styles.fullProfileBtn} onPress={() => { onClose(); navigation.navigate('Account'); }}>
+                        <Text style={styles.fullProfileText}>View Full Profile</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.logoutBtn} onPress={() => { onClose(); Alert.alert("Logged Out"); }}>
+                        <Text style={styles.logoutText}>Log Out</Text>
+                    </TouchableOpacity>
+                </View>
+            </TouchableOpacity>
         </Modal>
     );
 };
 
-// --- 5. SCREENS ---
+// --- MAIN SCREEN ---
 
-const AllPropertyTypesScreen = ({ onBack }: { onBack: () => void }) => {
-    return (
-        <View style={{ flex: 1, backgroundColor: '#fff' }}>
-            <View style={homeStyles.yellowHeader} />
-            <View style={{ flexDirection: 'row', alignItems: 'center', padding: 16 }}>
-                <TouchableOpacity onPress={onBack} style={{ marginRight: 10 }}>
-                    <Image 
-                        source={{ uri: "https://cdn-icons-png.flaticon.com/512/271/271220.png" }} 
-                        style={{ width: 24, height: 24 }} 
-                    />
-                </TouchableOpacity>
-                <Text style={{ fontSize: 18, fontWeight: 'bold' }}>All Property Types</Text>
-            </View>
-            <FlatList 
-                data={PROPERTY_TYPES}
-                numColumns={3}
-                contentContainerStyle={{ padding: 10 }}
-                renderItem={({ item }) => (
-                    <View key={item.id} style={{ flex: 1, margin: 5 }}>
-                        <PropertyTypeCard 
-                            item={item} 
-                            onPress={() => Alert.alert("Selected", item.name)} 
-                        />
-                    </View>
-                )}
-                keyExtractor={item => item.id}
-            />
-        </View>
-    );
-};
-
-type HomeContentNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'HomeRent'>;
-
-const HomeContent = ({ onProfilePress, onNotificationPress, onSeeAllTypes }: HomeContentProps) => {
-  const navigation = useNavigation<HomeContentNavigationProp>();
-  const [searchText, setSearchText] = useState("");
-  const [filteredProjects, setFilteredProjects] = useState(INITIAL_PROJECTS);
-  const [filteredLocalities, setFilteredLocalities] = useState(INITIAL_LOCALITIES);
-
-  useEffect(() => {
-    const lowerText = searchText.toLowerCase();
-    setFilteredProjects(
-      INITIAL_PROJECTS.filter(p => p.title.toLowerCase().includes(lowerText) || p.location.toLowerCase().includes(lowerText))
-    );
-    setFilteredLocalities(
-      INITIAL_LOCALITIES.filter(l => l.locality.toLowerCase().includes(lowerText))
-    );
-
-    // Check if search text is "jaipur" (case insensitive)
-    if (lowerText === 'jaipur') {
-      navigation.navigate('PropertyList', { searchQuery: searchText });
-    }
-  }, [searchText, navigation]);
-
-  return (
-    <ScrollView 
-      style={{ flex: 1, backgroundColor: "#FFFFFF" }} 
-      contentContainerStyle={{ paddingBottom: 120 }} 
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={homeStyles.yellowHeader} />
-
-      {/* Greeting & Notification */}
-      <View style={homeStyles.greetingRow}>
-        <TouchableOpacity 
-            style={{ flexDirection: "row", alignItems: "center" }} 
-            onPress={onProfilePress}
-            activeOpacity={0.7}
-        >
-          <Image
-            source={{ uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/kwi0sLffHL/y72puj28_expires_30_days.png" }}
-            resizeMode="stretch"
-            style={{ width: 30, height: 30, marginRight: 4 }}
-          />
-          <Text style={{ color: "#000000", fontSize: 12, fontWeight: "bold" }}>Hi Zenab!</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={onNotificationPress} activeOpacity={0.7}>
-            <Image
-            source={{ uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/kwi0sLffHL/7yzq1h7o_expires_30_days.png" }}
-            resizeMode="stretch"
-            style={{ width: 85, height: 38 }}
-            />
-        </TouchableOpacity>
-      </View>
-
-      {/* Action Buttons */}
-      <View style={homeStyles.actionRow}>
-        <FilterSortMapButton label="Filter" iconUri="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/kwi0sLffHL/2vrimqtw_expires_30_days.png" onPress={() => Alert.alert("Filter")} />
-        <FilterSortMapButton label="Sort" iconUri="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/kwi0sLffHL/91dq2k06_expires_30_days.png" onPress={() => Alert.alert("Sort")} />
-        <FilterSortMapButton label="Map" iconUri="https://storage.googleapis.com/tagjs-prod.appspot.com/v1/kwi0sLffHL/lecyldks_expires_30_days.png" onPress={() => Alert.alert("Map")} />
-      </View>
-
-      {/* Search Bar */}
-      <View style={homeStyles.searchBar}>
-        <Image
-          source={{ uri: "https://cdn-icons-png.flaticon.com/512/54/54481.png" }}
-          style={{ width: 20, height: 20, marginLeft: 12, marginRight: 8, tintColor: '#979797' }}
-          resizeMode="contain"
-        />
-        <TextInput
-          placeholder="Search city, locality, landmark..."
-          placeholderTextColor="#979797"
-          value={searchText}
-          onChangeText={setSearchText}
-          style={{ flex: 1, color: "#000", fontSize: 14, paddingVertical: 12 }}
-        />
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 12 }}>
-            {searchText.length > 0 && (
-                <TouchableOpacity onPress={() => setSearchText("")}>
-                    <Image
-                    source={{ uri: "https://cdn-icons-png.flaticon.com/512/2976/2976286.png" }}
-                    style={{ width: 16, height: 16, marginRight: 10, tintColor: '#999' }}
-                    />
-                </TouchableOpacity>
-            )}
-            <View style={{ width: 1, height: 20, backgroundColor: '#DDD', marginRight: 10 }} />
-            <TouchableOpacity onPress={() => Alert.alert("Location", "Using current location")}>
-                 <Image 
-                    source={{ uri: "https://cdn-icons-png.flaticon.com/512/684/684908.png" }}
-                    style={{ width: 22, height: 22, tintColor: '#FFDD32' }}
-                    resizeMode="contain"
-                 />
-            </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* SELECT PROPERTY TYPE SECTION */}
-      <View style={{ marginBottom: 24 }}>
-        <View style={homeStyles.sectionHeader}>
-          <Text style={[homeStyles.sectionTitle, { marginLeft: 16 }]}>Select Property Type</Text>
-          <TouchableOpacity onPress={onSeeAllTypes}>
-             <Text style={homeStyles.seeAll}>See all</Text>
-          </TouchableOpacity>
-        </View>
-        
-        <FlatList
-            data={PROPERTY_TYPES}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingLeft: 16, paddingRight: 8 }}
-            renderItem={({ item }) => (
-                <PropertyTypeCard 
-                    item={item} 
-                    onPress={() => Alert.alert("Selected Type", item.name)} 
-                />
-            )}
-            keyExtractor={item => item.id}
-        />
-      </View>
-
-      {/* High Demand Projects */}
-      <View style={{ height: 270, marginBottom: 24, marginHorizontal: 9 }}>
-        <View style={homeStyles.sectionHeader}>
-          <Text style={homeStyles.sectionTitle}>High Demand Projects</Text>
-          <TouchableOpacity onPress={() => Alert.alert("See All")}>
-            <Text style={homeStyles.seeAll}>See all</Text>
-          </TouchableOpacity>
-        </View>
-        <FlatList
-          data={filteredProjects}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          renderItem={({ item }) => <PropertyCard item={item} />}
-          keyExtractor={item => item.id}
-          contentContainerStyle={{ paddingLeft: 9 }}
-        />
-      </View>
-
-      {/* Best Rated Localities */}
-      <View style={{ marginBottom: 24, marginHorizontal: 9 }}>
-        <View style={homeStyles.sectionHeader}>
-          <Text style={homeStyles.sectionTitle}>Best Rated Localities</Text>
-          <TouchableOpacity onPress={() => Alert.alert("See All")}>
-            <Text style={homeStyles.seeAll}>See all</Text>
-          </TouchableOpacity>
-        </View>
-        <FlatList
-          data={filteredLocalities}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          renderItem={({ item }) => <LocalityCard item={item} />}
-          keyExtractor={item => item.id}
-          contentContainerStyle={{ paddingLeft: 9 }}
-        />
-      </View>
-    </ScrollView>
-  );
-};
-
-const PlaceholderScreen = ({ title }: { title: string }) => (
-    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff'}}>
-        <Text style={{fontSize: 20, fontWeight: 'bold', color: '#FFDD32'}}>{title}</Text>
-        <Text style={{color: '#999', marginTop: 10}}>Screen under construction</Text>
-    </View>
-);
-
-const HomeRentScreen = () => {
-  const [activeTab, setActiveTab] = useState("Home");
-  const [showAllTypes, setShowAllTypes] = useState(false);
-  const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
+export default function HomeRentScreen() {
+  const navigation = useNavigation();
   
-  // State for Profile Modal
-  const [profileModalVisible, setProfileModalVisible] = useState(false);
+  // Data State
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [filteredList, setFilteredList] = useState<Property[]>([]);
+  
+  // UI State
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("1"); // Default 'All'
+  const [profileVisible, setProfileVisible] = useState(false);
+  const [activeTab, setActiveTab] = useState("Home");
 
-  const handleProfileClick = () => {
-      // Show the Modal instead of navigating
-      setProfileModalVisible(true);
+  // --- 1. FETCH DATA (Simulating Backend) ---
+  const loadData = async () => {
+      try {
+          const [userData, cats, props] = await Promise.all([
+              MockAPI.getUser(),
+              MockAPI.getCategories(),
+              MockAPI.getProperties()
+          ]);
+          setUser(userData);
+          setCategories(cats);
+          setProperties(props);
+          setFilteredList(props); // Init filtered list
+      } catch (e) {
+          console.error("Failed to load data", e);
+      } finally {
+          setLoading(false);
+          setRefreshing(false);
+      }
   };
 
-  const handleNotificationClick = () => Alert.alert("Notifications", "You have 3 new property recommendations!");
+  useEffect(() => {
+      loadData();
+  }, []);
 
-  const renderScreen = () => {
-      if (activeTab === "Home" && showAllTypes) {
-          return <AllPropertyTypesScreen onBack={() => setShowAllTypes(false)} />;
+  const onRefresh = useCallback(() => {
+      setRefreshing(true);
+      loadData();
+  }, []);
+
+  // --- 2. FILTER LOGIC ---
+  useEffect(() => {
+      let result = properties;
+
+      // Category Filter
+      const currentCatName = categories.find(c => c.id === selectedCategory)?.name;
+      if (currentCatName && currentCatName !== 'All') {
+          result = result.filter(p => p.type === currentCatName);
       }
 
-      switch(activeTab) {
-          case "Home": 
-            return (
-                <HomeContent 
-                    onProfilePress={handleProfileClick} 
-                    onNotificationPress={handleNotificationClick}
-                    onSeeAllTypes={() => setShowAllTypes(true)}
-                />
-            );
-          case "Lists": return <PlaceholderScreen title="My Lists" />;
-          case "Saved": return <PlaceholderScreen title="Saved Properties" />;
-          case "Payment": return <PlaceholderScreen title="Payments" />;
-          case "Account": return <PlaceholderScreen title="My Account" />;
-          default: return <HomeContent onProfilePress={handleProfileClick} onNotificationPress={handleNotificationClick} onSeeAllTypes={() => setShowAllTypes(true)} />;
+      // Search Filter
+      if (searchText) {
+          const lower = searchText.toLowerCase();
+          result = result.filter(p => 
+              p.title.toLowerCase().includes(lower) || 
+              p.location.toLowerCase().includes(lower)
+          );
       }
+
+      setFilteredList(result);
+  }, [searchText, selectedCategory, properties, categories]);
+
+
+  // --- 3. NAVIGATION HANDLERS ---
+  const handlePropertyClick = (id: string) => {
+      // Navigate to details screen passing ID (ensure route exists)
+      // navigation.navigate('PropertyDetails', { id }); 
+      Alert.alert("Navigate", `Opening details for Property ID: ${id}`);
   };
 
   const tabs = [
-      { 
-        name: "Home", 
-        icon: "https://cdn-icons-png.flaticon.com/512/1946/1946436.png",
-        onPress: () => {
-          setActiveTab("Home");
-          setShowAllTypes(false);
-        }
-      },
-      { 
-        name: "Lists", 
-        icon: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/kwi0sLffHL/np8e1cjb_expires_30_days.png",
-        onPress: () => navigation.navigate('Lists')
-      },
-      { 
-        name: "Saved", 
-        icon: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/kwi0sLffHL/y6l2pvxu_expires_30_days.png",
-        onPress: () => navigation.navigate('Saved')
-      },
-      { 
-        name: "Payment", 
-        icon: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/kwi0sLffHL/feksi6gx_expires_30_days.png",
-        onPress: () => setActiveTab("Payment")
-      },
-      { 
-        name: "Account", 
-        icon: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/kwi0sLffHL/ht8icv1v_expires_30_days.png",
-        onPress: () => setActiveTab("Account")
-      },
+      // Route names must match those registered in your active navigator (AuthNavigator)
+      { name: "Home", icon: ICONS.home, route: "HomeRent" },  // AuthNavigator screen: HomeRent
+      { name: "Lists", icon: ICONS.list, route: "Lists" },     // AuthNavigator screen: Lists
+      { name: "Saved", icon: ICONS.heartNav, route: "Saved" }, // AuthNavigator screen: Saved
+      { name: "Payment", icon: ICONS.pay, route: "Payment" },  // AuthNavigator screen: Payment
+      { name: "Profile", icon: ICONS.userNav, route: "Account" }, // Navigate to Account screen
   ];
 
+
+  if (loading) {
+      return (
+          <View style={[styles.mainContainer, { justifyContent: 'center', alignItems: 'center' }]}>
+              <ActivityIndicator size="large" color="#FFDD32" />
+          </View>
+      );
+  }
+
   return (
-    <>
-      <SafeAreaView style={{ flex: 0, backgroundColor: "#FFDD32" }} />
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
-        <StatusBar barStyle="dark-content" backgroundColor="#FFDD32" />
+    <View style={styles.mainContainer}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFDD32" translucent />
+      
+      <View style={styles.yellowBackground} />
 
-        <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior={Platform.OS === "ios" ? "padding" : undefined}
-        >
-            <View style={{ flex: 1 }}>
-                {renderScreen()}
-            </View>
+      <SafeAreaView style={styles.safeArea}>
+          <ScrollView 
+            contentContainerStyle={{ paddingBottom: 120 }} 
+            showsVerticalScrollIndicator={false}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#000" />}
+          >
+              
+              {/* HEADER */}
+              <View style={styles.headerSection}>
+                  <View style={styles.userRow}>
+                      <TouchableOpacity style={styles.profileGroup} onPress={() => setProfileVisible(true)} activeOpacity={0.8}>
+                          <SmartImage source={{ uri: user?.avatar }} style={styles.userAvatar} />
+                          <View style={styles.userInfo}>
+                              <Text style={styles.welcomeText}>Good Morning,</Text>
+                              <Text style={styles.userName}>{user?.name.split(' ')[0]}!</Text>
+                          </View>
+                      </TouchableOpacity>
+                      
+                      <TouchableOpacity style={styles.notifBtn} onPress={() => Alert.alert("Notifications", "No new notifications")}>
+                          <Image source={{ uri: ICONS.notification }} style={styles.notifIcon} />
+                          <View style={styles.notifDot} />
+                      </TouchableOpacity>
+                  </View>
 
-            {/* Bottom Navigation */}
-            <View style={homeStyles.bottomNav}>
-                {tabs.map((tab, index) => {
-                    const isActive = activeTab === tab.name && !showAllTypes; 
-                    return (
-                        <TouchableOpacity 
-                            key={index} 
-                            style={homeStyles.navItem} 
-                            onPress={tab.onPress}
-                            activeOpacity={0.8}
-                        >
-                            <Image 
-                                source={{ uri: tab.icon }} 
-                                style={{ 
-                                    width: 24, 
-                                    height: 24, 
-                                    marginBottom: 4, 
-                                    opacity: isActive ? 1 : 0.6,
-                                    tintColor: '#FFF'
-                                }} 
-                                resizeMode="contain" 
-                            />
-                            <Text style={{ color: "#FFFFFF", fontSize: 12, fontWeight: isActive ? "bold" : "normal" }}>
-                                {tab.name}
-                            </Text>
-                            {isActive && <View style={{width: 4, height: 4, backgroundColor: '#fff', borderRadius: 2, marginTop: 2}} />}
-                        </TouchableOpacity>
-                    )
-                })}
-            </View>
+                  <View style={styles.searchBar}>
+                      <Image source={{ uri: ICONS.search }} style={styles.searchIcon} />
+                      <TextInput 
+                          placeholder="Search address, city, location..."
+                          placeholderTextColor="#999"
+                          style={styles.searchInput}
+                          value={searchText}
+                          onChangeText={setSearchText}
+                      />
+                  </View>
 
-            {/* Profile Popup Modal */}
-            <ProfileModal 
-                visible={profileModalVisible} 
-                onClose={() => setProfileModalVisible(false)} 
-            />
+                  <View style={styles.actionButtonsContainer}>
+                      <ActionButton label="Filter" icon={ICONS.filter} onPress={() => Alert.alert("Filter")} />
+                      <ActionButton label="Sort" icon={ICONS.sort} onPress={() => Alert.alert("Sort")} />
+                      <ActionButton label="Map" icon={ICONS.map} onPress={() => Alert.alert("Map")} />
+                  </View>
+              </View>
 
-        </KeyboardAvoidingView>
+              {/* BODY */}
+              <View style={styles.bodySection}>
+                  
+                  {/* Categories */}
+                  <View style={[styles.sectionHeader, { marginBottom: 15 }]}>
+                      <Text style={styles.sectionTitle}>Select Property Type</Text>
+                  </View>
+                  <View style={{ marginBottom: 25 }}>
+                      <FlatList 
+                          data={categories}
+                          horizontal
+                          showsHorizontalScrollIndicator={false}
+                          contentContainerStyle={{ paddingHorizontal: 20 }}
+                          keyExtractor={item => item.id}
+                          renderItem={({ item }) => (
+                              <CategoryItem 
+                                  item={item} 
+                                  isActive={selectedCategory === item.id}
+                                  onPress={() => setSelectedCategory(item.id)} 
+                              />
+                          )}
+                      />
+                  </View>
+
+                  {/* Featured (Horizontal) */}
+                  <View style={styles.sectionHeader}>
+                      <Text style={styles.sectionTitle}>High Demand</Text>
+                      <TouchableOpacity><Text style={styles.seeAll}>See All</Text></TouchableOpacity>
+                  </View>
+                  <FlatList 
+                      data={filteredList.filter(p => p.isFeatured)}
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={{ paddingHorizontal: 20 }}
+                      keyExtractor={item => item.id}
+                      renderItem={({ item }) => <FeaturedCard item={item} onPress={handlePropertyClick} />}
+                      ListEmptyComponent={<Text style={styles.emptyText}>No featured properties found.</Text>}
+                  />
+
+                  {/* Nearby (Vertical Stack) */}
+                  <View style={styles.sectionHeader}>
+                      <Text style={styles.sectionTitle}>Nearby You</Text>
+                      <TouchableOpacity><Text style={styles.seeAll}>See All</Text></TouchableOpacity>
+                  </View>
+                  <View style={{ paddingHorizontal: 20 }}>
+                      {filteredList.map(item => (
+                          <NearbyCard key={item.id} item={item} onPress={handlePropertyClick} />
+                      ))}
+                      {filteredList.length === 0 && (
+                          <Text style={styles.emptyText}>No properties found matching your search.</Text>
+                      )}
+                  </View>
+
+              </View>
+          </ScrollView>
       </SafeAreaView>
-    </>
+
+      {/* BOTTOM NAV */}
+      <View style={styles.bottomNavContainer}>
+          <View style={styles.bottomNav}>
+              {tabs.map((tab, index) => {
+                  const isActive = activeTab === tab.name;
+                  return (
+                      <TouchableOpacity 
+                          key={index} 
+                          style={[styles.navItem, isActive && styles.navItemActive]} 
+                          onPress={() => {
+                              setActiveTab(tab.name);
+                              // Navigate to the corresponding route (e.g. "Lists" -> Lists.tsx)
+                              // @ts-ignore - route names are defined in your navigator
+                              navigation.navigate(tab.route);
+                          }}
+                          activeOpacity={0.8}
+                      >
+                          <Image 
+                              source={{ uri: tab.icon }} 
+                              style={[styles.navIcon, isActive && { tintColor: '#000', width: 20, height: 20 }]} 
+                              resizeMode="contain"
+                          />
+                          {isActive && <Text style={styles.navText}>{tab.name}</Text>}
+                      </TouchableOpacity>
+                  )
+              })}
+          </View>
+      </View>
+
+      <ProfileModal visible={profileVisible} onClose={() => setProfileVisible(false)} user={user} navigation={navigation} />
+    </View>
   );
 }
-export default HomeRentScreen;
+
+const styles = StyleSheet.create({
+  mainContainer: { flex: 1, backgroundColor: "#F9F9F9" },
+  yellowBackground: { position: 'absolute', top: 0, left: 0, right: 0, height: 320, backgroundColor: '#FFDD32', borderBottomLeftRadius: 30, borderBottomRightRadius: 30 },
+  safeArea: { flex: 1, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 },
+  
+  // Header
+  headerSection: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 20 },
+  userRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, marginTop: 10 },
+  profileGroup: { flexDirection: 'row', alignItems: 'center' },
+  userAvatar: { width: 50, height: 50, borderRadius: 25, marginRight: 12, borderWidth: 2, borderColor: '#FFF' },
+  userInfo: { flexDirection: 'column' },
+  welcomeText: { fontSize: 14, color: '#000', fontWeight: '600', opacity: 0.7 },
+  userName: { fontSize: 20, fontWeight: '800', color: '#000' },
+  notifBtn: { backgroundColor: 'rgba(255,255,255,0.3)', padding: 10, borderRadius: 12 },
+  notifIcon: { width: 22, height: 22, tintColor: '#000' },
+  notifDot: { width: 8, height: 8, backgroundColor: 'red', borderRadius: 4, position: 'absolute', top: 8, right: 8, borderWidth: 1, borderColor: '#FFF' },
+
+  searchBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF', borderRadius: 15, paddingHorizontal: 15, height: 50, marginBottom: 15, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 5, elevation: 2 },
+  searchIcon: { width: 18, height: 18, tintColor: '#999', marginRight: 10 },
+  searchInput: { flex: 1, fontSize: 16, color: '#000' },
+
+  actionButtonsContainer: { flexDirection: 'row', justifyContent: 'space-between' },
+  actionBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.3)', paddingVertical: 8, paddingHorizontal: 15, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(0,0,0,0.05)' },
+  actionIcon: { width: 16, height: 16, marginRight: 6 },
+  actionLabel: { fontSize: 12, fontWeight: '700', color: '#000' },
+
+  bodySection: { paddingTop: 10 },
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginBottom: 15, marginTop: 10 },
+  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#000' },
+  seeAll: { fontSize: 14, fontWeight: '600', color: '#F5A623' },
+  emptyText: { textAlign: 'center', color: '#999', marginTop: 10, fontSize: 14 },
+
+  // Category
+  catItem: { alignItems: 'center', marginRight: 15, width: 100 },
+  catItemActive: { transform: [{scale: 1.05}] }, // slight zoom active
+  catIconContainer: { width: 85, height: 85, backgroundColor: '#FFF', borderRadius: 25, justifyContent: 'center', alignItems: 'center', marginBottom: 8, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3, borderWidth: 1, borderColor: '#F0F0F0' },
+  catIconContainerActive: { borderColor: '#FFDD32', borderWidth: 2, backgroundColor: '#FFFBE6' },
+  catIcon: { width: 48, height: 48 },
+  catText: { fontSize: 13, fontWeight: '600', color: '#666', textAlign: 'center' },
+  catTextActive: { color: '#000', fontWeight: 'bold' },
+
+  // Featured
+  featuredCard: { width: width * 0.75, height: 280, marginRight: 20, borderRadius: 25, backgroundColor: '#000', overflow: 'hidden', elevation: 5, marginBottom: 10 },
+  featuredImage: { width: '100%', height: '100%' },
+  featuredOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 15, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.6)', height: 100 },
+  featuredTag: { position: 'absolute', top: 15, left: 15, backgroundColor: '#FFDD32', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, zIndex: 10 },
+  featuredTagText: { color: '#000', fontWeight: 'bold', fontSize: 12 },
+  featuredTitle: { fontSize: 20, fontWeight: 'bold', color: '#FFF', marginBottom: 4 },
+  featuredLoc: { color: '#DDD', fontSize: 13 },
+  featuredPrice: { fontSize: 18, fontWeight: 'bold', color: '#FFDD32' },
+  rowCenter: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+  rowSpace: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  pinIconWhite: { width: 14, height: 14, tintColor: '#DDD', marginRight: 5 },
+  ratingBadge: { backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
+  ratingText: { color: '#FFF', fontSize: 12, fontWeight: 'bold' },
+
+  // Nearby
+  nearbyCard: { flexDirection: 'row', backgroundColor: '#FFF', padding: 12, borderRadius: 20, marginBottom: 15, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 5, elevation: 2, alignItems: 'center' },
+  nearbyImageContainer: { position: 'relative', marginRight: 15, width: 100, height: 100 },
+  nearbyImage: { width: '100%', height: '100%', borderRadius: 15 },
+  nearbyRatingBadge: { position: 'absolute', top: 8, left: 8, flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.9)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 },
+  tinyStar: { width: 10, height: 10, tintColor: '#FFDD32', marginRight: 2 },
+  tinyRatingText: { fontSize: 10, fontWeight: 'bold', color: '#000' },
+  nearbyContent: { flex: 1, justifyContent: 'center' },
+  nearbyTitle: { fontSize: 16, fontWeight: 'bold', color: '#000', marginBottom: 2 },
+  nearbyLoc: { fontSize: 12, color: '#888' },
+  pinIconSmall: { width: 12, height: 12, tintColor: '#999', marginRight: 4 },
+  featureRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8, marginBottom: 8 },
+  featureItem: { flexDirection: 'row', alignItems: 'center', marginRight: 12 },
+  featureIcon: { width: 14, height: 14, tintColor: '#666', marginRight: 4 },
+  featureText: { fontSize: 11, color: '#666', fontWeight: '600' },
+  separator: { height: 1, backgroundColor: '#F0F0F0', width: '100%', marginBottom: 8 },
+  nearbyPrice: { fontSize: 18, fontWeight: '800', color: '#000' },
+  perMonth: { fontSize: 12, color: '#999', fontWeight: 'normal' },
+  viewDetailsBtn: { backgroundColor: '#F5F5F5', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10 },
+  viewDetailsText: { fontSize: 11, fontWeight: 'bold', color: '#333' },
+
+  // Nav
+  bottomNavContainer: { position: 'absolute', bottom: 25, left: 0, right: 0, alignItems: 'center', justifyContent: 'center' },
+  bottomNav: { flexDirection: 'row', backgroundColor: '#FFF', width: width * 0.9, borderRadius: 35, height: 70, alignItems: 'center', justifyContent: 'space-around', paddingHorizontal: 10, shadowColor: "#000", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.15, shadowRadius: 20, elevation: 10 },
+  navItem: { alignItems: 'center', justifyContent: 'center', padding: 10, borderRadius: 25 },
+  navItemActive: { backgroundColor: '#FFDD32', flexDirection: 'row', paddingHorizontal: 15, paddingVertical: 10 },
+  navIcon: { width: 24, height: 24, tintColor: '#CCC' },
+  navText: { marginLeft: 8, fontWeight: 'bold', fontSize: 12, color: '#000' },
+
+  // Modal
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' },
+  modalCard: { width: '85%', backgroundColor: '#FFF', borderRadius: 25, padding: 25, alignItems: 'center', elevation: 10 },
+  closeBtn: { position: 'absolute', top: 15, right: 20, padding: 5 },
+  modalHeader: { alignItems: 'center', marginTop: 10, marginBottom: 20 },
+  avatarContainer: { position: 'relative', marginBottom: 15 },
+  modalAvatar: { width: 90, height: 90, borderRadius: 45 },
+  verifiedBadge: { position: 'absolute', bottom: 0, right: 0, backgroundColor: '#2ECC71', borderRadius: 12, width: 24, height: 24, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#FFF' },
+  modalName: { fontSize: 22, fontWeight: 'bold', color: '#000', marginBottom: 5 },
+  modalRole: { fontSize: 14, color: '#666', fontWeight: '600', backgroundColor: '#F5F5F5', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 10 },
+  divider: { width: '100%', height: 1, backgroundColor: '#EEE', marginVertical: 15 },
+  infoRow: { flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginBottom: 10 },
+  infoLabel: { color: '#888', fontSize: 14, fontWeight: '600' },
+  infoValue: { color: '#333', fontSize: 14, fontWeight: 'bold' },
+  fullProfileBtn: { width: '100%', backgroundColor: '#FFDD32', paddingVertical: 14, borderRadius: 15, alignItems: 'center', marginBottom: 10, marginTop: 10 },
+  fullProfileText: { fontSize: 16, fontWeight: 'bold', color: '#000' },
+  logoutBtn: { paddingVertical: 10 },
+  logoutText: { fontSize: 14, color: '#FF3B30', fontWeight: '600' }
+});

@@ -15,6 +15,13 @@ import VisitScheduled from '../screens/auth/VisitScheduled';
 import ThankYou from '../screens/auth/ThankYou';
 import Saved from '../screens/auth/Saved';
 import Saved1 from '../screens/auth/Saved1';
+import Payment from '../screens/auth/Payment';
+import PaymentHistory from '../screens/auth/PaymentHistory';
+import TransactionSuccess from '../screens/auth/TransactionSuccess';
+import Account from '../screens/auth/Account';
+import OccupiedProperty from '../screens/auth/OccupiedProperty';
+import PoliceVerification from '../screens/auth/PoliceVerification';
+import IPhone1647 from '../screens/auth/IPhone1647';
 
 const Stack = createStackNavigator<AuthStackParamList>();
 
@@ -100,6 +107,55 @@ export function AuthNavigator() {
       <Stack.Screen 
         name="Saved1" 
         component={Saved1}
+        options={{
+          headerShown: false
+        }} 
+      />
+      <Stack.Screen 
+        name="PaymentHistory" 
+        component={PaymentHistory}
+        options={{
+          headerShown: false
+        }} 
+      />
+      <Stack.Screen 
+        name="Payment" 
+        component={Payment}
+        options={{
+          headerShown: false
+        }} 
+      />
+      <Stack.Screen 
+        name="TransactionSuccess" 
+        component={TransactionSuccess}
+        options={{
+          headerShown: false
+        }} 
+      />
+      <Stack.Screen 
+        name="Account" 
+        component={Account}
+        options={{
+          headerShown: false
+        }} 
+      />
+      <Stack.Screen 
+        name="OccupiedProperty" 
+        component={OccupiedProperty}
+        options={{
+          headerShown: false
+        }} 
+      />
+      <Stack.Screen 
+        name="PoliceVerification" 
+        component={PoliceVerification}
+        options={{
+          headerShown: false
+        }} 
+      />
+      <Stack.Screen 
+        name="IPhone1647" 
+        component={IPhone1647}
         options={{
           headerShown: false
         }} 

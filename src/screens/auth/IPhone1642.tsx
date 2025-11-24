@@ -2,325 +2,354 @@ import React, { useEffect, useRef } from "react";
 import { 
   SafeAreaView, 
   View, 
-  ImageBackground, 
-  ScrollView, 
   Image, 
   TouchableOpacity, 
   Text, 
-  StyleSheet,
-  Alert,
-  Animated,
-  Easing
+  StyleSheet, 
+  Animated, 
+  Dimensions, 
+  StatusBar,
+  Platform,
+  LayoutAnimation,
+  UIManager
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { AuthStackParamList } from "../../navigation/types";
-import { StackNavigationProp } from "@react-navigation/stack";
 
-type IPhone1642NavigationProp = StackNavigationProp<AuthStackParamList, 'IPhone1642'>;
+// Enable LayoutAnimation for Android
+if (Platform.OS === 'android') {
+  if (UIManager.setLayoutAnimationEnabledExperimental) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+  }
+}
 
-const IPhone1642: React.FC = () => {
-  const navigation = useNavigation<IPhone1642NavigationProp>();
-  
-  // Animation values
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideY = useRef(new Animated.Value(20)).current;
-  
-  // Separate animation values for each button
-  const loginBounce = useRef(new Animated.Value(1)).current;
-  const phoneBounce = useRef(new Animated.Value(1)).current;
-  const skipBounce = useRef(new Animated.Value(1)).current;
-  const registerBounce = useRef(new Animated.Value(1)).current;
+const { width, height } = Dimensions.get("window");
+
+// --- Assets ---
+const ASSETS = {
+    // Background Image
+    background: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/3dab4ya8_expires_30_days.png",
+    // Logo
+    logo: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/jvyiaa5r_expires_30_days.png",
+};
+
+interface NavigationProps {
+    navigate: (screen: string) => void;
+}
+
+export default function LoginOptionsScreen() {
+  const navigation = useNavigation<NavigationProps>();
+
+  // --- Animations ---
+  const fadeAnim = useRef(new Animated.Value(0)).current; 
+  const sheetSlide = useRef(new Animated.Value(height)).current; // Start sheet off-screen
+  const logoScale = useRef(new Animated.Value(0)).current;
+
+  // Button Animations
+  const btnScalePrimary = useRef(new Animated.Value(1)).current;
+  const btnScaleSecondary = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideY, {
-        toValue: 0,
-        duration: 700,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      })
+    Animated.sequence([
+        // 1. Fade In Background
+        Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 600,
+            useNativeDriver: true,
+        }),
+        // 2. Logo Pop
+        Animated.spring(logoScale, {
+            toValue: 1,
+            friction: 6,
+            tension: 40,
+            useNativeDriver: true,
+        }),
+        // 3. Sheet Slide Up
+        Animated.spring(sheetSlide, {
+            toValue: 0,
+            friction: 7,
+            tension: 30,
+            useNativeDriver: true,
+        })
     ]).start();
   }, []);
 
-  // Button press animation
-  const animateButtonPress = (bounceValue: Animated.Value, callback: () => void) => {
+  // --- Button Press Animation Helper ---
+  const animateButton = (scaleVal: Animated.Value, callback: () => void) => {
     Animated.sequence([
-      Animated.timing(bounceValue, {
-        toValue: 0.95,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.spring(bounceValue, {
-        toValue: 1,
-        friction: 4,
-        useNativeDriver: true,
-      })
+        Animated.timing(scaleVal, { toValue: 0.95, duration: 100, useNativeDriver: true }),
+        Animated.timing(scaleVal, { toValue: 1, duration: 100, useNativeDriver: true }),
     ]).start(callback);
-  };
-  
-  const handleLoginPress = () => {
-    animateButtonPress(loginBounce, () => {
-      try {
-        console.log('Navigating to Login screen');
-        navigation.navigate('Login');
-      } catch (error) {
-        console.error('Error navigating to Login:', error);
-        Alert.alert('Error', 'Failed to navigate to Login screen');
-      }
-    });
-  };
-
-  const handleRegisterPress = () => {
-    animateButtonPress(registerBounce, () => {
-      try {
-        console.log('Navigating to Register screen');
-        navigation.navigate('Register');
-      } catch (error) {
-        console.error('Error navigating to Register:', error);
-        Alert.alert('Error', 'Failed to navigate to Register screen');
-      }
-    });
-  };
-
-  const handlePhonePress = () => {
-    animateButtonPress(phoneBounce, () => {
-      try {
-        console.log('Navigating to Mobile Login screen');
-        navigation.navigate('MobileLogin');
-      } catch (error) {
-        console.error('Error navigating to Mobile Login:', error);
-        Alert.alert('Error', 'Failed to navigate to Mobile Login screen');
-      }
-    });
-  };
-
-  const handleSkipPress = () => {
-    // @ts-ignore - HomeRent is now properly typed in AuthStackParamList
-    navigation.navigate('HomeRent');
   };
 
   return (
-    <SafeAreaView style={styles.container} testID="iphone1642-screen">
-      <ImageBackground 
-        source={{uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/3dab4ya8_expires_30_days.png"}} 
-        resizeMode="stretch"
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+
+      {/* --- Background Image --- */}
+      <Image 
+        source={{ uri: ASSETS.background }} 
         style={styles.backgroundImage}
-      >
-        <ScrollView 
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <Animated.View 
-            style={[
-              styles.logoContainer,
-              {
-                opacity: fadeAnim,
-                transform: [{ translateY: slideY }]
-              }
-            ]}
-          >
-            <Image
-              source={{uri: "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/sE8iZvpPof/jvyiaa5r_expires_30_days.png"}} 
-              resizeMode="contain"
-              style={styles.logoImage}
-              accessibilityLabel="App Logo"
-            />
-          </Animated.View>
+        resizeMode="cover"
+      />
 
-          <Animated.View 
-            style={[
-              styles.buttonContainer,
-              {
-                opacity: fadeAnim,
-                transform: [{ translateY: slideY }]
-              }
-            ]}
-          >
-            <Animated.View style={{ transform: [{ scale: loginBounce }] }}>
-              <TouchableOpacity 
-                style={styles.primaryButton} 
-                onPress={handleLoginPress}
-                activeOpacity={0.8}
-                accessibilityLabel="Login with email"
-                testID="login-button"
-              >
-                <Text style={styles.buttonText}>Login via Email</Text>
-              </TouchableOpacity>
-            </Animated.View>
-          </Animated.View>
-
-          <Animated.View 
-            style={[
-              styles.dividerContainer,
-              {
-                opacity: fadeAnim,
-                transform: [{ translateY: slideY }]
-              }
-            ]}
-          >
-            <View style={styles.divider} />
-            <Text style={styles.dividerText}>or</Text>
-            <View style={styles.divider} />
-          </Animated.View>
-
-          <Animated.View 
-            style={[
-              styles.buttonContainer,
-              {
-                opacity: fadeAnim,
-                transform: [{ translateY: slideY }]
-              }
-            ]}
-          >
-            <Animated.View style={{ transform: [{ scale: phoneBounce }] }}>
-              <TouchableOpacity 
-                style={styles.secondaryButton} 
-                onPress={handlePhonePress}
-                activeOpacity={0.8}
-                accessibilityLabel="Continue with phone number"
-              >
-                <Text style={[styles.buttonText, styles.secondaryButtonText]}>Continue via Phone number</Text>
-              </TouchableOpacity>
-            </Animated.View>
-          </Animated.View>
-
-          <View style={styles.registerContainer}>
-            <Text style={styles.registerText}>Don't have an account?</Text>
-            <Animated.View style={{ transform: [{ scale: registerBounce }] }}>
-              <TouchableOpacity 
-                onPress={handleRegisterPress}
-                accessibilityLabel="Navigate to registration"
-                testID="register-button"
-              >
-                <Text style={styles.registerLink}>Register</Text>
-              </TouchableOpacity>
-            </Animated.View>
-          </View>
-
-          <Animated.View style={[styles.skipButton, { transform: [{ scale: skipBounce }] }]}>
-            <TouchableOpacity 
-              onPress={handleSkipPress}
-              accessibilityLabel="Skip for now"
-              style={{ width: '100%', alignItems: 'center' }}
+      <SafeAreaView style={styles.safeArea}>
+        
+        {/* --- Top Section: Logo --- */}
+        <View style={styles.topSection}>
+            <Animated.View 
+                style={[
+                    styles.logoContainer, 
+                    { opacity: fadeAnim, transform: [{ scale: logoScale }] }
+                ]}
             >
-              <Text style={styles.skipText}>Skip for now</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        </ScrollView>
-      </ImageBackground>
-    </SafeAreaView>
+                <Image
+                    source={{ uri: ASSETS.logo }} 
+                    resizeMode="contain"
+                    style={styles.logo}
+                />
+            </Animated.View>
+        </View>
+
+        {/* --- Bottom Section: Interactive Sheet --- */}
+        <Animated.View 
+            style={[
+                styles.bottomSheet,
+                { transform: [{ translateY: sheetSlide }] }
+            ]}
+        >
+            <View style={styles.sheetContent}>
+                
+                {/* Visual Handle */}
+                <View style={styles.handleIndicator} />
+                
+                {/* Welcome Text */}
+                <Text style={styles.welcomeTitle}>Welcome Back!</Text>
+                <Text style={styles.welcomeSub}>Login to continue finding your perfect stay.</Text>
+
+                {/* Login Email Button */}
+                <Animated.View style={{ transform: [{ scale: btnScalePrimary }], width: '100%' }}>
+                    <TouchableOpacity 
+                        style={styles.primaryButton}
+                        activeOpacity={1}
+                        onPress={() => animateButton(btnScalePrimary, () => navigation.navigate('Login'))}
+                    >
+                        <Text style={styles.primaryBtnText}>Login via Email</Text>
+                    </TouchableOpacity>
+                </Animated.View>
+
+                {/* Divider */}
+                <View style={styles.dividerRow}>
+                    <View style={styles.line} />
+                    <Text style={styles.orText}>OR</Text>
+                    <View style={styles.line} />
+                </View>
+
+                {/* Phone Button */}
+                <Animated.View style={{ transform: [{ scale: btnScaleSecondary }], width: '100%' }}>
+                    <TouchableOpacity 
+                        style={styles.secondaryButton}
+                        activeOpacity={1}
+                        onPress={() => animateButton(btnScaleSecondary, () => navigation.navigate('MobileLogin'))}
+                    >
+                        <Text style={styles.secondaryBtnText}>Continue via Phone Number</Text>
+                    </TouchableOpacity>
+                </Animated.View>
+
+                {/* Register Row */}
+                <View style={styles.registerRow}>
+                    <Text style={styles.regText}>Don't have an account? </Text>
+                    <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+                        <Text style={styles.regLink}>Register</Text>
+                    </TouchableOpacity>
+                </View>
+
+                {/* Skip Button */}
+                <TouchableOpacity 
+                    style={styles.skipButton} 
+                    onPress={() => navigation.navigate('HomeRent')}
+                    activeOpacity={0.8}
+                >
+                    <Text style={styles.skipText}>Skip for now</Text>
+                </TouchableOpacity>
+
+            </View>
+        </Animated.View>
+
+      </SafeAreaView>
+    </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#F5F5F5',
   },
   backgroundImage: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: width,
+    height: height * 0.65, // Image takes top 65%
   },
-  scrollView: {
+  safeArea: {
     flex: 1,
+    justifyContent: 'space-between',
   },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 20,
+  
+  // --- Top Section ---
+  topSection: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: 50, // Reduced padding, logo is bigger
   },
   logoContainer: {
-    width: '100%',
-    marginTop: 30,
-    marginBottom: 40,
+    width: width * 0.85, // Increased width for a larger logo
+    height: width * 0.6,  // Increased height
     alignItems: 'center',
+    justifyContent: 'center',
+    // Removed shadow for a cleaner look with the large image
   },
-  logoImage: {
-    height: 400,
+  logo: {
+    width: '100%',
+    height: '100%',
+  },
+
+  // --- Bottom Sheet ---
+  bottomSheet: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 15,
+    elevation: 25,
+    // Ensure minimum height to cover bottom area
+    minHeight: height * 0.45, 
+    justifyContent: 'flex-end'
+  },
+  sheetContent: {
+    alignItems: 'center',
     width: '100%',
   },
-  buttonContainer: {
-    marginHorizontal: 16,
-    marginBottom: 16,
-    opacity: 0, // Initial state for animation
+  handleIndicator: {
+      width: 50,
+      height: 5,
+      backgroundColor: '#E0E0E0',
+      borderRadius: 3,
+      marginBottom: 20,
   },
+  welcomeTitle: {
+      fontSize: 22,
+      fontWeight: '800',
+      color: '#1F2937',
+      marginBottom: 5,
+  },
+  welcomeSub: {
+      fontSize: 14,
+      color: '#6B7280',
+      marginBottom: 25,
+      textAlign: 'center'
+  },
+
+  // --- Buttons ---
   primaryButton: {
-    backgroundColor: "#F8D800",
-    borderRadius: 10,
+    backgroundColor: "#FFDD32", // Brand Yellow
+    width: '100%',
     paddingVertical: 16,
-    alignItems: "center",
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: "#FFDD32",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 5,
     borderWidth: 1,
-    borderColor: '#000000',
+    borderColor: 'rgba(0,0,0,0.05)'
   },
+  primaryBtnText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#000",
+    letterSpacing: 0.5,
+  },
+
   secondaryButton: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 10,
+    width: '100%',
     paddingVertical: 16,
-    alignItems: "center",
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#000000',
+    borderColor: '#E5E7EB',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
-  buttonText: {
-    color: "#000000",
-    fontSize: 14,
+  secondaryBtnText: {
+    fontSize: 16,
     fontWeight: "bold",
+    color: "#374151",
   },
-  secondaryButtonText: {
-    color: "#000000",
+
+  // --- Divider ---
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    marginVertical: 20,
   },
-  dividerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 16,
-    marginHorizontal: 16,
-  },
-  divider: {
+  line: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: '#F3F4F6',
   },
-  dividerText: {
-    color: "#808080",
+  orText: {
+    marginHorizontal: 15,
+    color: '#9CA3AF',
     fontSize: 12,
-    marginHorizontal: 8,
+    fontWeight: '600',
   },
-  registerContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginVertical: 16,
+
+  // --- Footer Actions ---
+  registerRow: {
+    flexDirection: 'row',
+    marginTop: 25,
+    alignItems: 'center',
   },
-  registerText: {
-    color: "#000000",
-    fontSize: 12,
-    fontWeight: "bold",
-    marginRight: 6,
+  regText: {
+    color: "#6B7280",
+    fontSize: 14,
   },
-  registerLink: {
-    color: "#B50E00",
-    fontSize: 12,
-    fontWeight: "bold",
-    textDecorationLine: 'underline',
-  },
-  skipButton: {
-    alignItems: "center",
-    marginTop: 8,
-    marginBottom: 20,
-    paddingVertical: 12,
-    marginHorizontal: 16,
-    borderWidth: 1,
-    borderColor: '#000000',
-    borderRadius: 10,
-    backgroundColor: '#FFFFFF',
-  },
-  skipText: {
-    color: "#000000",
+  regLink: {
+    color: "#D32F2F", // Strong Accent Color
     fontSize: 14,
     fontWeight: "bold",
   },
-});
 
-export default IPhone1642;
+  // --- Skip Button (New Design) ---
+  skipButton: {
+    marginTop: 25,
+    paddingVertical: 12,
+    paddingHorizontal: 35,
+    borderRadius: 30,
+    borderWidth: 1.5,
+    borderColor: '#E0E0E0',
+    backgroundColor: '#FAFAFA',
+  },
+  skipText: {
+    color: "#757575",
+    fontSize: 15,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+  }
+});
