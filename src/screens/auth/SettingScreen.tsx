@@ -10,7 +10,6 @@ import {
   Dimensions,
   StatusBar,
   Platform,
-  Switch,
   Alert,
   LayoutAnimation,
   UIManager
@@ -26,22 +25,26 @@ if (Platform.OS === 'android') {
 
 const { width } = Dimensions.get('window');
 
-// --- ASSETS ---
+// --- PROFESSIONAL MONOCHROME ASSETS ---
 const ASSETS = {
     back: "https://cdn-icons-png.flaticon.com/512/271/271220.png",
     user: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=250&auto=format&fit=crop",
-    arrowRight: "https://cdn-icons-png.flaticon.com/512/271/271228.png",
+    chevronRight: "https://cdn-icons-png.flaticon.com/512/271/271228.png",
     
-    // Icons
+    // Line Icons (Clean & Professional)
     profile: "https://cdn-icons-png.flaticon.com/512/1077/1077114.png",
-    theme: "https://cdn-icons-png.flaticon.com/512/1608/1608912.png", // Moon/Sun
-    security: "https://cdn-icons-png.flaticon.com/512/2092/2092663.png", // Shield
-    help: "https://cdn-icons-png.flaticon.com/512/471/471664.png", // Question
-    language: "https://cdn-icons-png.flaticon.com/512/3898/3898150.png", // Globe
     
-    // Theme Icons
-    sun: "https://cdn-icons-png.flaticon.com/512/869/869869.png",
-    moon: "https://cdn-icons-png.flaticon.com/512/547/547433.png",
+    // UPDATED: Professional Icons
+    theme: "https://img.icons8.com/ios/50/000000/paint-palette.png", // Paint Palette for Appearance
+    language: "https://img.icons8.com/ios/50/000000/translation.png", // Translation symbol for Language
+    
+    security: "https://cdn-icons-png.flaticon.com/512/3064/3064197.png", // Lock
+    help: "https://cdn-icons-png.flaticon.com/512/471/471664.png", // Question Circle
+    notification: "https://cdn-icons-png.flaticon.com/512/3602/3602145.png", // Bell
+    
+    // UPDATED: Theme Toggle Icons (Clean Line Art)
+    sun: "https://img.icons8.com/ios/50/000000/sun--v1.png",
+    moon: "https://img.icons8.com/ios/50/000000/moon-symbol.png",
 };
 
 export default function SettingsScreen() {
@@ -50,6 +53,7 @@ export default function SettingsScreen() {
   // State
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [language, setLanguage] = useState("English");
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   // Handlers
   const toggleTheme = (mode: boolean) => {
@@ -98,40 +102,71 @@ export default function SettingsScreen() {
                 <Image source={{ uri: ASSETS.user }} style={styles.avatar} />
                 <View style={styles.profileInfo}>
                     <Text style={styles.userName}>Zenab Vxuh</Text>
-                    <Text style={styles.viewProfile}>View Profile</Text>
+                    <Text style={styles.userRole}>Premium Member</Text>
                 </View>
-                <Image source={{ uri: ASSETS.arrowRight }} style={styles.chevron} />
+                <View style={styles.editBadge}>
+                    <Text style={styles.editText}>Edit</Text>
+                </View>
             </TouchableOpacity>
 
             {/* 2. Account Section */}
             <Text style={styles.sectionHeader}>Account</Text>
             <View style={styles.settingsGroup}>
+                
                 <TouchableOpacity style={styles.settingItem} onPress={() => Alert.alert("Personal Info")}>
-                    <View style={[styles.iconBox, {backgroundColor: '#E3F2FD'}]}>
-                        <Image source={{ uri: ASSETS.profile }} style={[styles.settingIcon, {tintColor: '#1976D2'}]} />
+                    <View style={styles.iconBox}>
+                        <Image source={{ uri: ASSETS.profile }} style={styles.settingIcon} />
                     </View>
                     <View style={styles.settingTextContainer}>
                         <Text style={styles.settingTitle}>Personal Information</Text>
-                        <Text style={styles.settingSub}>Manage your account details</Text>
                     </View>
-                    <Image source={{ uri: ASSETS.arrowRight }} style={styles.chevron} />
+                    <Image source={{ uri: ASSETS.chevronRight }} style={styles.chevron} />
                 </TouchableOpacity>
+                
+                <View style={styles.divider} />
+
+                <TouchableOpacity style={styles.settingItem} onPress={() => Alert.alert("Security")}>
+                    <View style={styles.iconBox}>
+                        <Image source={{ uri: ASSETS.security }} style={styles.settingIcon} />
+                    </View>
+                    <Text style={styles.settingTitle}>Security & Login</Text>
+                    <Image source={{ uri: ASSETS.chevronRight }} style={styles.chevron} />
+                </TouchableOpacity>
+
             </View>
 
-            {/* 3. General Section */}
-            <Text style={styles.sectionHeader}>General</Text>
+            {/* 3. Preferences Section */}
+            <Text style={styles.sectionHeader}>Preferences</Text>
             <View style={styles.settingsGroup}>
                 
-                {/* Theme Switcher */}
+                {/* Notifications Toggle */}
                 <View style={styles.settingItem}>
-                    <View style={[styles.iconBox, {backgroundColor: '#FFF3E0'}]}>
-                        <Image source={{ uri: ASSETS.theme }} style={[styles.settingIcon, {tintColor: '#F57C00'}]} />
+                    <View style={styles.iconBox}>
+                        <Image source={{ uri: ASSETS.notification }} style={styles.settingIcon} />
                     </View>
                     <View style={styles.settingTextContainer}>
-                        <Text style={styles.settingTitle}>Theme</Text>
+                        <Text style={styles.settingTitle}>Notifications</Text>
+                    </View>
+                    <TouchableOpacity 
+                        onPress={() => setNotificationsEnabled(!notificationsEnabled)}
+                        style={[styles.toggleTrack, notificationsEnabled && styles.toggleTrackActive]}
+                    >
+                        <View style={[styles.toggleThumb, notificationsEnabled && styles.toggleThumbActive]} />
+                    </TouchableOpacity>
+                </View>
+
+                <View style={styles.divider} />
+
+                {/* Theme Switcher */}
+                <View style={styles.settingItem}>
+                    <View style={styles.iconBox}>
+                        <Image source={{ uri: ASSETS.theme }} style={styles.settingIcon} />
+                    </View>
+                    <View style={styles.settingTextContainer}>
+                        <Text style={styles.settingTitle}>Appearance</Text>
                     </View>
                     
-                    {/* Custom Segmented Control */}
+                    {/* Segmented Control */}
                     <View style={styles.themeToggleContainer}>
                         <TouchableOpacity 
                             style={[styles.themeBtn, !isDarkMode && styles.themeBtnActive]} 
@@ -150,42 +185,33 @@ export default function SettingsScreen() {
 
                 <View style={styles.divider} />
 
-                {/* Security */}
-                <TouchableOpacity style={styles.settingItem} onPress={() => Alert.alert("Security")}>
-                    <View style={[styles.iconBox, {backgroundColor: '#E8F5E9'}]}>
-                        <Image source={{ uri: ASSETS.security }} style={[styles.settingIcon, {tintColor: '#388E3C'}]} />
-                    </View>
-                    <Text style={styles.settingTitle}>Security</Text>
-                    <Image source={{ uri: ASSETS.arrowRight }} style={styles.chevron} />
-                </TouchableOpacity>
-
-                <View style={styles.divider} />
-
-                {/* Help Centre */}
-                <TouchableOpacity style={styles.settingItem} onPress={() => Alert.alert("Help")}>
-                    <View style={[styles.iconBox, {backgroundColor: '#F3E5F5'}]}>
-                        <Image source={{ uri: ASSETS.help }} style={[styles.settingIcon, {tintColor: '#7B1FA2'}]} />
-                    </View>
-                    <Text style={styles.settingTitle}>Help Centre</Text>
-                    <Image source={{ uri: ASSETS.arrowRight }} style={styles.chevron} />
-                </TouchableOpacity>
-
-                <View style={styles.divider} />
-
                 {/* Language */}
                 <TouchableOpacity style={styles.settingItem} onPress={handleLanguage}>
-                    <View style={[styles.iconBox, {backgroundColor: '#E0F7FA'}]}>
-                        <Image source={{ uri: ASSETS.language }} style={[styles.settingIcon, {tintColor: '#0097A7'}]} />
+                    <View style={styles.iconBox}>
+                        <Image source={{ uri: ASSETS.language }} style={styles.settingIcon} />
                     </View>
                     <Text style={styles.settingTitle}>Language</Text>
                     <View style={styles.languageBadge}>
                         <Text style={styles.languageText}>{language}</Text>
                     </View>
+                    <Image source={{ uri: ASSETS.chevronRight }} style={styles.chevron} />
+                </TouchableOpacity>
+            </View>
+
+            {/* 4. Support Section */}
+            <Text style={styles.sectionHeader}>Support</Text>
+            <View style={styles.settingsGroup}>
+                 <TouchableOpacity style={styles.settingItem} onPress={() => Alert.alert("Help")}>
+                    <View style={styles.iconBox}>
+                        <Image source={{ uri: ASSETS.help }} style={styles.settingIcon} />
+                    </View>
+                    <Text style={styles.settingTitle}>Help Centre</Text>
+                    <Image source={{ uri: ASSETS.chevronRight }} style={styles.chevron} />
                 </TouchableOpacity>
             </View>
 
             {/* App Version */}
-            <Text style={styles.versionText}>Version 2.4.0</Text>
+            <Text style={styles.versionText}>App Version 2.4.0</Text>
 
         </ScrollView>
       </SafeAreaView>
@@ -194,7 +220,7 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  mainContainer: { flex: 1, backgroundColor: "#F9F9F9" },
+  mainContainer: { flex: 1, backgroundColor: "#F5F7FA" },
   
   yellowBackground: { 
       position: 'absolute', top: 0, left: 0, right: 0, height: 250, 
@@ -208,8 +234,8 @@ const styles = StyleSheet.create({
       flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', 
       paddingHorizontal: 20, paddingTop: 20, paddingBottom: 15
   },
-  backButton: { padding: 5, backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: 12 },
-  backIcon: { width: 24, height: 24, tintColor: '#000' },
+  backButton: { padding: 8, backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: 12 },
+  backIcon: { width: 20, height: 20, tintColor: '#000' },
   headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#000' },
 
   scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },
@@ -217,45 +243,62 @@ const styles = StyleSheet.create({
   // Profile Card
   profileCard: {
       flexDirection: 'row', alignItems: 'center',
-      backgroundColor: '#FFF', borderRadius: 20, padding: 20,
-      shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 10, elevation: 5,
-      marginBottom: 25, marginTop: 10
+      backgroundColor: '#FFF', borderRadius: 16, padding: 16,
+      shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 3,
+      marginBottom: 25, marginTop: 10,
+      borderWidth: 1, borderColor: 'rgba(0,0,0,0.02)'
   },
-  avatar: { width: 60, height: 60, borderRadius: 30, marginRight: 15 },
+  avatar: { width: 56, height: 56, borderRadius: 28, marginRight: 15 },
   profileInfo: { flex: 1 },
-  userName: { fontSize: 18, fontWeight: 'bold', color: '#000' },
-  viewProfile: { fontSize: 14, color: '#FFDD32', fontWeight: 'bold', marginTop: 2 },
+  userName: { fontSize: 18, fontWeight: 'bold', color: '#111' },
+  userRole: { fontSize: 13, color: '#666', marginTop: 2 },
+  editBadge: { backgroundColor: '#F5F7FA', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
+  editText: { fontSize: 12, fontWeight: '600', color: '#333' },
 
   // Sections
-  sectionHeader: { fontSize: 16, fontWeight: 'bold', color: '#666', marginBottom: 10, marginLeft: 5, textTransform: 'uppercase' },
+  sectionHeader: { fontSize: 13, fontWeight: '700', color: '#888', marginBottom: 10, marginLeft: 5, textTransform: 'uppercase', letterSpacing: 0.5 },
   
   settingsGroup: {
-      backgroundColor: '#FFF', borderRadius: 20, padding: 5, marginBottom: 25,
-      shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 5, elevation: 2
+      backgroundColor: '#FFF', borderRadius: 16, overflow: 'hidden', marginBottom: 25,
+      shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.03, shadowRadius: 5, elevation: 2,
+      borderWidth: 1, borderColor: 'rgba(0,0,0,0.02)'
   },
   settingItem: {
-      flexDirection: 'row', alignItems: 'center', padding: 15,
+      flexDirection: 'row', alignItems: 'center', padding: 16, height: 64
   },
-  iconBox: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginRight: 15 },
-  settingIcon: { width: 20, height: 20 },
+  
+  // Professional Icon Styling
+  iconBox: { 
+      width: 36, height: 36, borderRadius: 10, 
+      justifyContent: 'center', alignItems: 'center', marginRight: 15,
+      backgroundColor: '#F5F7FA' // Clean gray background for all icons
+  },
+  settingIcon: { width: 20, height: 20, tintColor: '#333' }, // Dark grey tint for professional look
+  
   settingTextContainer: { flex: 1 },
-  settingTitle: { fontSize: 16, fontWeight: 'bold', color: '#333', flex: 1 },
+  settingTitle: { fontSize: 16, fontWeight: '600', color: '#111', flex: 1 },
   settingSub: { fontSize: 12, color: '#999', marginTop: 2 },
   chevron: { width: 16, height: 16, tintColor: '#CCC' },
-  divider: { height: 1, backgroundColor: '#F5F5F5', marginLeft: 70, marginRight: 20 },
+  divider: { height: 1, backgroundColor: '#F5F7FA', marginLeft: 66, marginRight: 20 },
 
   // Theme Toggle
   themeToggleContainer: {
-      flexDirection: 'row', backgroundColor: '#F0F0F0', borderRadius: 20, padding: 3
+      flexDirection: 'row', backgroundColor: '#F0F0F0', borderRadius: 20, padding: 2
   },
-  themeBtn: { width: 36, height: 30, borderRadius: 15, justifyContent: 'center', alignItems: 'center' },
-  themeBtnActive: { backgroundColor: '#000' }, // Active is black
-  themeIcon: { width: 16, height: 16, tintColor: '#999' }, // Inactive is grey
+  themeBtn: { width: 34, height: 28, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
+  themeBtnActive: { backgroundColor: '#FFF', shadowColor: "#000", shadowOpacity: 0.1, shadowRadius: 2, elevation: 2 }, // Active is white card
+  themeIcon: { width: 16, height: 16, tintColor: '#999' }, 
+
+  // Simple Switch
+  toggleTrack: { width: 44, height: 24, borderRadius: 12, backgroundColor: '#E0E0E0', padding: 2 },
+  toggleTrackActive: { backgroundColor: '#FFDD32' },
+  toggleThumb: { width: 20, height: 20, borderRadius: 10, backgroundColor: '#FFF' },
+  toggleThumbActive: { alignSelf: 'flex-end' },
 
   // Language Badge
-  languageBadge: { backgroundColor: '#F5F5F5', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
-  languageText: { fontSize: 13, fontWeight: 'bold', color: '#333' },
+  languageBadge: { marginRight: 10 },
+  languageText: { fontSize: 14, color: '#666', fontWeight: '500' },
 
   // Version
-  versionText: { textAlign: 'center', color: '#CCC', fontSize: 12, marginTop: 10, marginBottom: 20 }
+  versionText: { textAlign: 'center', color: '#CCC', fontSize: 12, marginTop: 10, marginBottom: 30 }
 });
