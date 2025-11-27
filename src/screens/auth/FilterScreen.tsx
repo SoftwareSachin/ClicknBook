@@ -100,33 +100,36 @@ const AMENITIES = [
 
 // --- CUSTOM RANGE SLIDER COMPONENT ---
 const RangeSlider = ({ min, max, onValuesChange }: { min: number, max: number, onValuesChange: (min: number, max: number) => void }) => {
-    const [width, setWidth] = useState(0);
+    const [sliderWidth, setSliderWidth] = useState(0);
     const [low, setLow] = useState(min);
     const [high, setHigh] = useState(max);
 
+    // Refs to store values during gestures (avoiding closure stale state)
+    const startLow = useRef(min);
+    const startHigh = useRef(max);
+
     // Calculate pixel position from value
     const getPosition = (value: number) => {
-        if (width === 0) return 0;
-        return ((value - min) / (max - min)) * width;
-    };
-
-    // Calculate value from pixel position
-    const getValue = (position: number) => {
-        if (width === 0) return min;
-        const val = (position / width) * (max - min) + min;
-        return Math.max(min, Math.min(max, Math.round(val / 100) * 100)); // Snap to 100
+        if (sliderWidth === 0) return 0;
+        return ((value - min) / (max - min)) * sliderWidth;
     };
 
     const panResponderLow = useRef(
         PanResponder.create({
             onStartShouldSetPanResponder: () => true,
+            onMoveShouldSetPanResponder: () => true, // Claim touch from ScrollView
+            onPanResponderGrant: () => {
+                startLow.current = low;
+            },
             onPanResponderMove: (_, gestureState) => {
-                const newPos = Math.max(0, Math.min(width, getPosition(low) + gestureState.dx));
-                const newVal = getValue(newPos);
-                if (newVal < high - 500) { // Minimum gap
-                    setLow(newVal);
-                    onValuesChange(newVal, high);
-                }
+                if (sliderWidth === 0) return;
+                // Calculate new value based on drag distance
+                const diff = (gestureState.dx / sliderWidth) * (max - min);
+                const newValue = Math.max(min, Math.min(high - 1000, startLow.current + diff)); // Maintain 1000 gap
+                const snapped = Math.round(newValue / 100) * 100; // Snap to 100
+                
+                setLow(snapped);
+                onValuesChange(snapped, high);
             },
         })
     ).current;
@@ -134,13 +137,18 @@ const RangeSlider = ({ min, max, onValuesChange }: { min: number, max: number, o
     const panResponderHigh = useRef(
         PanResponder.create({
             onStartShouldSetPanResponder: () => true,
+            onMoveShouldSetPanResponder: () => true, // Claim touch from ScrollView
+            onPanResponderGrant: () => {
+                startHigh.current = high;
+            },
             onPanResponderMove: (_, gestureState) => {
-                const newPos = Math.max(0, Math.min(width, getPosition(high) + gestureState.dx));
-                const newVal = getValue(newPos);
-                if (newVal > low + 500) { // Minimum gap
-                    setHigh(newVal);
-                    onValuesChange(low, newVal);
-                }
+                if (sliderWidth === 0) return;
+                const diff = (gestureState.dx / sliderWidth) * (max - min);
+                const newValue = Math.max(low + 1000, Math.min(max, startHigh.current + diff)); // Maintain 1000 gap
+                const snapped = Math.round(newValue / 100) * 100;
+
+                setHigh(snapped);
+                onValuesChange(low, snapped);
             },
         })
     ).current;
@@ -148,19 +156,25 @@ const RangeSlider = ({ min, max, onValuesChange }: { min: number, max: number, o
     return (
         <View 
             style={sliderStyles.container} 
-            onLayout={(e) => setWidth(e.nativeEvent.layout.width - 20)} // -20 for thumb width padding
+            onLayout={(e) => setSliderWidth(e.nativeEvent.layout.width)}
         >
+            {/* Track Background */}
             <View style={sliderStyles.rail} />
+            
+            {/* Active Track */}
             <View 
                 style={[
                     sliderStyles.railSelected, 
-                    { left: getPosition(low), width: getPosition(high) - getPosition(low) }
+                    { 
+                        left: getPosition(low), 
+                        width: getPosition(high) - getPosition(low) 
+                    }
                 ]} 
             />
             
             {/* Left Thumb */}
             <View 
-                style={[sliderStyles.thumb, { left: getPosition(low) }]} 
+                style={[sliderStyles.thumb, { left: getPosition(low) - 12 }]} 
                 {...panResponderLow.panHandlers} 
             >
                  <View style={sliderStyles.thumbDot} />
@@ -168,12 +182,13 @@ const RangeSlider = ({ min, max, onValuesChange }: { min: number, max: number, o
 
             {/* Right Thumb */}
             <View 
-                style={[sliderStyles.thumb, { left: getPosition(high) }]} 
+                style={[sliderStyles.thumb, { left: getPosition(high) - 12 }]} 
                 {...panResponderHigh.panHandlers} 
             >
                 <View style={sliderStyles.thumbDot} />
             </View>
 
+            {/* Labels */}
             <View style={sliderStyles.labelContainer}>
                 <Text style={sliderStyles.labelText}>₹{low}</Text>
                 <Text style={sliderStyles.labelText}>₹{high}</Text>
@@ -183,7 +198,7 @@ const RangeSlider = ({ min, max, onValuesChange }: { min: number, max: number, o
 };
 
 const sliderStyles = StyleSheet.create({
-    container: { height: 40, justifyContent: 'center', marginHorizontal: 10, marginTop: 10 },
+    container: { height: 40, justifyContent: 'center', marginHorizontal: 10, marginTop: 15, marginBottom: 20 },
     rail: { flex: 1, height: 4, borderRadius: 2, backgroundColor: '#E0E0E0', position: 'absolute', width: '100%' },
     railSelected: { height: 4, backgroundColor: '#FFDD32', borderRadius: 2, position: 'absolute' },
     thumb: { 
@@ -192,8 +207,8 @@ const sliderStyles = StyleSheet.create({
         justifyContent: 'center', alignItems: 'center', elevation: 4, shadowColor: '#000', shadowOpacity: 0.2, shadowOffset: {width: 0, height: 2}
     },
     thumbDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#FFF' },
-    labelContainer: { flexDirection: 'row', justifyContent: 'space-between', position: 'absolute', top: 25, width: '100%' },
-    labelText: { fontSize: 14, fontWeight: 'bold', color: '#000' }
+    labelContainer: { flexDirection: 'row', justifyContent: 'space-between', position: 'absolute', top: 30, width: '100%' },
+    labelText: { fontSize: 14, fontWeight: 'bold', color: '#333' }
 });
 
 export default function FilterScreen() {
@@ -248,7 +263,7 @@ export default function FilterScreen() {
   };
 
   const handleBudgetChange = (min: number, max: number) => {
-      // Optional: Debounce this if updating heavy state
+      // Update local state for potential API calls
       setMinPrice(min);
       setMaxPrice(max);
   }
