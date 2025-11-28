@@ -23,6 +23,10 @@ import {
   UIManager
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { AuthStackParamList } from "../../navigation/types";
+
+import { useAuthContext } from "../../context/AuthContext";
 
 // Enable LayoutAnimation for Android
 if (Platform.OS === 'android') {
@@ -53,7 +57,9 @@ const ASSETS = {
 };
 
 export default function Login() {
-    const navigation = useNavigation();
+    const navigation = useNavigation<StackNavigationProp<AuthStackParamList, "Login">>();
+    
+    const { login } = useAuthContext();
     
     // --- State ---
     const [email, setEmail] = useState("");
@@ -119,20 +125,29 @@ export default function Login() {
         return isValid;
     };
 
-    const handleLogin = () => {
+    const handleLogin = async () => {
         Keyboard.dismiss();
         if (!validateInputs()) return;
 
         // Start Loading
         setIsLoading(true);
         
-        // Simulate API Call
-        setTimeout(() => {
+        try {
+            const { success, error } = await login({ email, password });
+
+            if (success) {
+                Alert.alert("Success", "Login Successful!", [
+                    { text: "OK", onPress: () => navigation.navigate("HomeRent") }
+                ]);
+            } else {
+                Alert.alert("Login Failed", error || "Invalid email or password");
+            }
+        } catch (err) {
+            const message = err instanceof Error ? err.message : "Login failed";
+            Alert.alert("Login Failed", message);
+        } finally {
             setIsLoading(false);
-            Alert.alert("Success", "Login Successful!", [
-                { text: "OK", onPress: () => console.log("Navigate to Home") } // Add navigation here
-            ]);
-        }, 2000);
+        }
     };
 
     const handleSocialLogin = (platform: string) => {

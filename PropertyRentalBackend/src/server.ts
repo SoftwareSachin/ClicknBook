@@ -1,10 +1,15 @@
-import express from 'express';
-import mongoose from 'mongoose';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import authRoutes from './routes/auth';
-import propertyRoutes from './routes/properties';
-import bookingRoutes from './routes/bookings';
+import { connectDB } from './config/db';
+import userModel from './models/User.js';
+import authRoutes from './routes/authRoutes.js';
+
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: any;
+  }
+}
 
 dotenv.config();
 
@@ -15,29 +20,37 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// Database connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/property-rental';
+// Initialize database and start server
+const startServer = async () => {
+  try {
+    // Connect to PostgreSQL
+    await connectDB();
+    
+    try {
+      // Drop and recreate tables (remove this in production after initial setup)
+      await userModel.dropTable().catch(console.error);
+      await userModel.createTable();
+      console.log('✅ Database tables initialized');
+    } catch (error) {
+      console.error('❌ Database initialization error:', error);
+      process.exit(1);
+    }
 
-mongoose.connect(MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.error('MongoDB connection error:', err));
+    // Routes
+    app.get('/', (_req: Request, res: Response) => {
+      res.send('Property Rental API is running');
+    });
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/properties', propertyRoutes);
-app.use('/api/bookings', bookingRoutes);
+    // Auth
+    app.use('/api/auth', authRoutes);
 
-// Basic route for testing
-app.get('/', (req, res) => {
-  res.send('Property Rental API is running');
-});
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
+};
 
-// Error handling middleware
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Something went wrong!' });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+startServer();

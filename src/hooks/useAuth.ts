@@ -43,9 +43,9 @@ export const useAuth = () => {
   const login = useCallback(async ({ email, password }: LoginCredentials) => {
     try {
       setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
-      const response = await authService.login(email, password);
+      const { user } = await authService.login({ email, password });
       setAuthState({
-        user: response as User,
+        user,
         isLoading: false,
         isAuthenticated: true,
         error: null,
@@ -65,9 +65,9 @@ export const useAuth = () => {
   const register = useCallback(async (userData: RegisterData) => {
     try {
       setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
-      const response = await authService.register(userData);
+      const { user } = await authService.register(userData);
       setAuthState({
-        user: response as User,
+        user,
         isLoading: false,
         isAuthenticated: true,
         error: null,

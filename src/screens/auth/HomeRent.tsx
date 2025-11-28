@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+
 import {
   SafeAreaView,
   View,
@@ -18,6 +19,7 @@ import {
   RefreshControl
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { useAuthContext } from "../../context/AuthContext";
 
 const { width, height } = Dimensions.get('window');
 
@@ -280,6 +282,7 @@ const ProfileModal = ({ visible, onClose, user, navigation }: any) => {
 
 export default function HomeRentScreen() {
   const navigation = useNavigation();
+  const { user: authUser } = useAuthContext();
   
   // Data State
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -294,6 +297,8 @@ export default function HomeRentScreen() {
   const [selectedCategory, setSelectedCategory] = useState("1"); // Default 'All'
   const [profileVisible, setProfileVisible] = useState(false);
   const [activeTab, setActiveTab] = useState("Home");
+
+  console.log('HomeRentScreen authUser:', authUser);
 
   // --- 1. FETCH DATA (Simulating Backend) ---
   const loadData = async () => {
@@ -363,6 +368,16 @@ export default function HomeRentScreen() {
       { name: "Profile", icon: ICONS.userNav, route: "Account" }, // Navigate to Account screen
   ];
 
+  const profileUser = authUser
+    ? {
+        id: authUser.id,
+        name: authUser.name,
+        email: authUser.email,
+        phone: authUser.phone || user?.phone || '',
+        avatar: user?.avatar || "https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=250&auto=format&fit=crop",
+        isPremium: user?.isPremium ?? false,
+      }
+    : user;
 
   if (loading) {
       return (
@@ -389,10 +404,12 @@ export default function HomeRentScreen() {
               <View style={styles.headerSection}>
                   <View style={styles.userRow}>
                       <TouchableOpacity style={styles.profileGroup} onPress={() => setProfileVisible(true)} activeOpacity={0.8}>
-                          <SmartImage source={{ uri: user?.avatar }} style={styles.userAvatar} />
+                          <SmartImage source={{ uri: authUser?.avatar || user?.avatar }} style={styles.userAvatar} />
                           <View style={styles.userInfo}>
                               <Text style={styles.welcomeText}>Good Morning,</Text>
-                              <Text style={styles.userName}>{user?.name.split(' ')[0]}!</Text>
+                              <Text style={styles.userName}>
+                                {(authUser?.name || user?.name || authUser?.email || 'Guest').split(' ')[0]}!
+                              </Text>
                           </View>
                       </TouchableOpacity>
                       
@@ -513,7 +530,7 @@ export default function HomeRentScreen() {
           </View>
       </View>
 
-      <ProfileModal visible={profileVisible} onClose={() => setProfileVisible(false)} user={user} navigation={navigation} />
+      <ProfileModal visible={profileVisible} onClose={() => setProfileVisible(false)} user={profileUser} navigation={navigation} />
     </View>
   );
 }

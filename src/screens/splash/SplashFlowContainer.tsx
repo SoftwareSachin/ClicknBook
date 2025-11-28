@@ -10,6 +10,7 @@ import IPhone1616 from './IPhone1616';
 import IPhone1618 from './IPhone1618';
 import IPhone1617 from './IPhone1617';
 import IPhone1619 from './IPhone1619';
+import { AuthProvider } from '../../context/AuthContext';
 
 interface Props {
   onSplashComplete?: () => void;
@@ -29,7 +30,9 @@ export default function SplashFlowContainer({ onSplashComplete }: Props) {
       name: 'Auth', 
       component: () => (
         <NavigationContainer>
-          <AuthNavigator />
+          <AuthProvider>
+            <AuthNavigator />
+          </AuthProvider>
         </NavigationContainer>
       ), 
       isNavigator: true 

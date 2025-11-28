@@ -19,6 +19,7 @@ import Login from './src/screens/auth/Login';
 import Register from './src/screens/auth/Register';
 import Lists from './src/screens/auth/Lists';
 import HomeRentScreen from './src/screens/auth/HomeRent';
+import { AuthProvider } from './src/context/AuthContext';
 
 // Import navigation types
 import { RootStackParamList } from './src/types/navigation';
@@ -68,63 +69,65 @@ export default function App() {
     setShowSplash(false);
   };
 
-  if (showSplash) {
-    return (
-      <SafeAreaProvider>
-        <SplashFlowContainer onSplashComplete={handleSplashComplete} />
-      </SafeAreaProvider>
-    );
-  }
-
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{
-          headerStyle: {
-            backgroundColor: '#ffffff',
-          },
-          headerTintColor: '#000000',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-          headerBackTitle: 'Back',
-        }}>
-          <Stack.Screen 
-            name="Login" 
-            component={Login} 
-            options={{ headerShown: false }} 
-          />
-          <Stack.Screen 
-            name="Register" 
-            component={Register} 
-            options={{ 
-              title: 'Create Account',
-              headerShown: true,
-            }} 
-          />
-          <Stack.Screen 
-            name="ForgotPassword" 
-            component={ForgotPasswordScreen} 
-            options={{ 
-              title: 'Forgot Password',
-              headerShown: true,
-            }} 
-          />
-          <Stack.Screen 
-            name="Main" 
-            component={MainTabs} 
-            options={{ headerShown: false }} 
-          />
-          <Stack.Screen 
-            name="PropertyDetail" 
-            component={PropertyDetailScreen} 
-            options={{ 
-              title: 'Property Details',
-            }} 
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-      <StatusBar style="auto" />
+      {showSplash ? (
+        <SplashFlowContainer onSplashComplete={handleSplashComplete} />
+      ) : (
+        <>
+          <NavigationContainer>
+            <AuthProvider>
+              <Stack.Navigator
+                screenOptions={{
+                  headerStyle: {
+                    backgroundColor: '#ffffff',
+                  },
+                  headerTintColor: '#000000',
+                  headerTitleStyle: {
+                    fontWeight: 'bold',
+                  },
+                  headerBackTitle: 'Back',
+                }}
+              >
+                <Stack.Screen
+                  name="Login"
+                  component={Login}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="Register"
+                  component={Register}
+                  options={{
+                    title: 'Create Account',
+                    headerShown: true,
+                  }}
+                />
+                <Stack.Screen
+                  name="ForgotPassword"
+                  component={ForgotPasswordScreen}
+                  options={{
+                    title: 'Forgot Password',
+                    headerShown: true,
+                  }}
+                />
+                <Stack.Screen
+                  name="Main"
+                  component={MainTabs}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="PropertyDetail"
+                  component={PropertyDetailScreen}
+                  options={{
+                    title: 'Property Details',
+                  }}
+                />
+              </Stack.Navigator>
+            </AuthProvider>
+          </NavigationContainer>
+          <StatusBar style="auto" />
+        </>
+      )}
     </SafeAreaProvider>
   );
 }

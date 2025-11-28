@@ -20,6 +20,9 @@ import {
 } from "react-native";
 import CountryPicker, { CountryCode, Country } from "react-native-country-picker-modal";
 import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { useAuthContext } from "../../context/AuthContext";
+import { AuthStackParamList } from "../../navigation/types";
 
 const { width, height } = Dimensions.get("window");
 
@@ -40,7 +43,8 @@ const ASSETS = {
 };
 
 export default function Register() {
-    const navigation = useNavigation();
+    const navigation = useNavigation<StackNavigationProp<AuthStackParamList, "Register">>();
+    const { register } = useAuthContext();
 
     // --- State ---
     const [firstName, setFirstName] = useState("");
@@ -78,7 +82,7 @@ export default function Register() {
         setPickerVisible(false);
     };
 
-    const handleRegister = () => {
+    const handleRegister = async () => {
         if (!firstName || !email || !mobile || !password || !confirmPassword) {
             Alert.alert("Missing Fields", "Please fill in all required fields.");
             return;
@@ -94,13 +98,29 @@ export default function Register() {
 
         setIsLoading(true);
         
-        // Simulate Registration API
-        setTimeout(() => {
+        try {
+            const fullName = `${firstName} ${lastName}`.trim();
+            const phone = mobile ? `+${callingCode}${mobile}` : undefined;
+            const { success, error } = await register({
+                name: fullName,
+                email,
+                password,
+                phone,
+            });
+
+            if (success) {
+                Alert.alert("Success", "Account Created Successfully!", [
+                    { text: "Go to Home", onPress: () => navigation.navigate("HomeRent") }
+                ]);
+            } else {
+                Alert.alert("Registration Failed", error || "Failed to create account");
+            }
+        } catch (err) {
+            const message = err instanceof Error ? err.message : "Registration failed";
+            Alert.alert("Registration Failed", message);
+        } finally {
             setIsLoading(false);
-            Alert.alert("Success", "Account Created Successfully!", [
-                { text: "Go to Home", onPress: () => navigation.navigate("HomeRent") } 
-            ]);
-        }, 2000);
+        }
     };
 
     return (

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+
 import {
   SafeAreaView,
   View,
@@ -15,6 +16,7 @@ import {
   Clipboard
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { useAuthContext } from "../../context/AuthContext";
 
 const { width } = Dimensions.get('window');
 
@@ -47,6 +49,7 @@ const ASSETS = {
 
 export default function Account() {
   const navigation = useNavigation();
+  const { user, logout } = useAuthContext();
   const [activeTab, setActiveTab] = useState("Account");
   const [referralCode] = useState("RM2025");
 
@@ -65,12 +68,7 @@ export default function Account() {
           text: "Log Out", 
           style: 'destructive',
           onPress: () => {
-            // Reset navigation stack to Login screen
-            // @ts-ignore
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'Login' }], 
-            });
+            logout();
           } 
         }
       ]
@@ -123,9 +121,9 @@ export default function Account() {
               <View style={styles.profileCard}>
                   <Image source={{ uri: ASSETS.avatar }} style={styles.avatar} />
                   <View style={styles.profileInfo}>
-                      <Text style={styles.userName}>Zenab Vxuh</Text>
-                      <Text style={styles.userRole}>Guest User</Text>
-                      <Text style={styles.userPhone}>+91 98765 43210</Text>
+                      <Text style={styles.userName}>{user?.name || user?.email || "Guest User"}</Text>
+                      <Text style={styles.userRole}>{user ? "Verified User" : "Guest User"}</Text>
+                      <Text style={styles.userPhone}>{user?.phone || user?.email || "No phone"}</Text>
                   </View>
               </View>
 
