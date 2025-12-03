@@ -9,7 +9,7 @@ import { AuthNavigator } from '../../navigation/AuthNavigator';
 import Onboarding_1 from './Onboarding_1';
 import Onboarding_2 from './Onboarding_2';
 import Onboarding_3 from './Onboarding_3';
-import IPhone1619 from './IPhone1619';
+import Onboarding_4 from './Onboarding_4';
 import { AuthProvider } from '../../context/AuthContext';
 
 interface Props {
@@ -25,7 +25,7 @@ export default function SplashFlowContainer({ onSplashComplete }: Props) {
     { name: 'Onboarding_1', component: Onboarding_1 },
     { name: 'Onboarding_2', component: Onboarding_2 },
     { name: 'Onboarding_3', component: Onboarding_3 },
-    { name: 'IPhone1619', component: IPhone1619 },
+    { name: 'Onboarding_4', component: Onboarding_4 },
     { 
       name: 'Auth', 
       component: () => (
