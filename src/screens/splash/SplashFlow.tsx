@@ -7,7 +7,7 @@ import splash_2 from './splash_2';
 import Splash_3 from './Splash_3';
 import Onboarding_1 from './Onboarding_1';
 import Onboarding_2 from './Onboarding_2';
-import IPhone1617 from './IPhone1617';
+import Onboarding_3 from './Onboarding_3';
 import IPhone1619 from './IPhone1619';
 
 interface Props {
@@ -24,7 +24,7 @@ export default function SplashFlow({ onComplete, onSplashComplete }: Props) {
     { name: 'Splash_3', component: Splash_3, duration: 3000 },
     { name: 'Onboarding_1', component: Onboarding_1, duration: 3000 },
     { name: 'Onboarding_2', component: Onboarding_2, duration: 3000 },
-    { name: 'IPhone1617', component: IPhone1617, duration: 3000 },
+    { name: 'Onboarding_3', component: Onboarding_3, duration: 3000 },
     { name: 'IPhone1619', component: IPhone1619, duration: 3000 },
   ];
 

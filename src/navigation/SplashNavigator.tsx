@@ -8,7 +8,7 @@ import splash_2 from '../screens/splash/splash_2';
 import Splash_3 from '../screens/splash/Splash_3';
 import Onboarding_1 from '../screens/splash/Onboarding_1';
 import Onboarding_2 from '../screens/splash/Onboarding_2';
-import IPhone1617 from '../screens/splash/IPhone1617';
+import Onboarding_3 from '../screens/splash/Onboarding_3';
 import IPhone1619 from '../screens/splash/IPhone1619';
 import { AuthNavigator } from './AuthNavigator';
 
@@ -28,7 +28,7 @@ export function SplashNavigator({ onSplashComplete }: SplashNavigatorProps) {
     { name: 'Splash_3', component: Splash_3, duration: 3000 },
     { name: 'Onboarding_1', component: Onboarding_1, duration: 3000 },
     { name: 'Onboarding_2', component: Onboarding_2, duration: 3000 },
-    { name: 'IPhone1617', component: IPhone1617, duration: 3000 },
+    { name: 'Onboarding_3', component: Onboarding_3, duration: 3000 },
     { name: 'IPhone1619', component: IPhone1619, duration: 3000 },
     { name: 'Auth', component: AuthNavigator, isNavigator: true },
   ];
@@ -97,7 +97,7 @@ export function StackSplashNavigator({ onSplashComplete }: SplashNavigatorProps)
       <Stack.Screen name="Splash_3" component={Splash_3} />
       <Stack.Screen name="Onboarding_1" component={Onboarding_1} />
       <Stack.Screen name="Onboarding_2" component={Onboarding_2} />
-      <Stack.Screen name="IPhone1617" component={IPhone1617} />
+      <Stack.Screen name="Onboarding_3" component={Onboarding_3} />
       <Stack.Screen name="IPhone1619" component={IPhone1619} />
       <Stack.Screen 
         name="Auth" 
