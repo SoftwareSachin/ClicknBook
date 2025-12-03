@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createStackNavigator, StackCardStyleInterpolator } from '@react-navigation/stack';
 import { View, StyleSheet } from 'react-native';
 
 // Import all splash screens
 import IPhone1661 from '../screens/splash/IPhone1661';
-import IPhone1660 from '../screens/splash/IPhone1660';
-import IPhone1641 from '../screens/splash/IPhone1641';
-import IPhone1616 from '../screens/splash/IPhone1616';
+import splash_2 from '../screens/splash/splash_2';
+import Splash_3 from '../screens/splash/Splash_3';
+import Onboarding_1 from '../screens/splash/Onboarding_1';
 import IPhone1618 from '../screens/splash/IPhone1618';
 import IPhone1617 from '../screens/splash/IPhone1617';
 import IPhone1619 from '../screens/splash/IPhone1619';
@@ -24,9 +24,9 @@ export function SplashNavigator({ onSplashComplete }: SplashNavigatorProps) {
   
   const splashScreens = [
     { name: 'IPhone1661', component: IPhone1661, duration: 3000 },
-    { name: 'IPhone1660', component: IPhone1660, duration: 3000 },
-    { name: 'IPhone1641', component: IPhone1641, duration: 3000 },
-    { name: 'IPhone1616', component: IPhone1616, duration: 3000 },
+    { name: 'splash_2', component: splash_2, duration: 3000 },
+    { name: 'Splash_3', component: Splash_3, duration: 3000 },
+    { name: 'Onboarding_1', component: Onboarding_1, duration: 3000 },
     { name: 'IPhone1618', component: IPhone1618, duration: 3000 },
     { name: 'IPhone1617', component: IPhone1617, duration: 3000 },
     { name: 'IPhone1619', component: IPhone1619, duration: 3000 },
@@ -60,7 +60,7 @@ export function SplashNavigator({ onSplashComplete }: SplashNavigatorProps) {
 }
 
 // Custom transition configuration
-const forFade = ({ current, next }) => {
+const forFade: StackCardStyleInterpolator = ({ current, next }) => {
   const opacity = current.progress.interpolate({
     inputRange: [0, 1],
     outputRange: [0, 1],
@@ -93,9 +93,9 @@ export function StackSplashNavigator({ onSplashComplete }: SplashNavigatorProps)
       }}
     >
       <Stack.Screen name="IPhone1661" component={IPhone1661} />
-      <Stack.Screen name="IPhone1660" component={IPhone1660} />
-      <Stack.Screen name="IPhone1641" component={IPhone1641} />
-      <Stack.Screen name="IPhone1616" component={IPhone1616} />
+      <Stack.Screen name="splash_2" component={splash_2} />
+      <Stack.Screen name="Splash_3" component={Splash_3} />
+      <Stack.Screen name="Onboarding_1" component={Onboarding_1} />
       <Stack.Screen name="IPhone1618" component={IPhone1618} />
       <Stack.Screen name="IPhone1617" component={IPhone1617} />
       <Stack.Screen name="IPhone1619" component={IPhone1619} />

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import IPhone1617 from './IPhone1617';
-import IPhone1641 from './IPhone1641';
-import IPhone1660 from './IPhone1660';
+import Splash_3 from './Splash_3';
+import splash_2 from './splash_2';
 import IPhone1661 from './IPhone1661';
 
 interface Props {
@@ -11,8 +11,8 @@ interface Props {
 
 const splashScreens = [
   { component: IPhone1661, duration: 2000 },
-  { component: IPhone1660, duration: 2000 },
-  { component: IPhone1641, duration: 2000 },
+  { component: splash_2, duration: 2000 },
+  { component: Splash_3, duration: 2000 },
   { component: IPhone1617, duration: 3000 },
 ];
 

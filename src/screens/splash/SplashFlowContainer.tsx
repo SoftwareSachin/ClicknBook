@@ -3,10 +3,10 @@ import { View, StyleSheet, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 
 // Import all splash screens
-import IPhone1660 from './IPhone1660';
-import IPhone1641 from './IPhone1641';
+import splash_2 from './splash_2';
+import Splash_3 from './Splash_3';
 import { AuthNavigator } from '../../navigation/AuthNavigator';
-import IPhone1616 from './IPhone1616';
+import Onboarding_1 from './Onboarding_1';
 import IPhone1618 from './IPhone1618';
 import IPhone1617 from './IPhone1617';
 import IPhone1619 from './IPhone1619';
@@ -20,9 +20,9 @@ export default function SplashFlowContainer({ onSplashComplete }: Props) {
   const [currentScreenIndex, setCurrentScreenIndex] = useState(0);
   
   const splashScreens = [
-    { name: 'IPhone1660', component: IPhone1660, duration: 3000 },
-    { name: 'IPhone1641', component: IPhone1641, duration: 3000 },
-    { name: 'IPhone1616', component: IPhone1616 },
+    { name: 'splash_2', component: splash_2, duration: 3000 },
+    { name: 'Splash_3', component: Splash_3, duration: 3000 },
+    { name: 'Onboarding_1', component: Onboarding_1 },
     { name: 'IPhone1618', component: IPhone1618 },
     { name: 'IPhone1617', component: IPhone1617 },
     { name: 'IPhone1619', component: IPhone1619 },
