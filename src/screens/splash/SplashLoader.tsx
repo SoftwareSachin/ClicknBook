@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import Onboarding_3 from './Onboarding_3';
 import Splash_3 from './Splash_3';
-import splash_2 from './splash_2';
+import Splash_2 from './Splash_2';
 import Splash_1 from './Splash_1';
 
 interface Props {
@@ -11,7 +11,7 @@ interface Props {
 
 const splashScreens = [
   { component: Splash_1, duration: 2000 },
-  { component: splash_2, duration: 2000 },
+  { component: Splash_2, duration: 2000 },
   { component: Splash_3, duration: 2000 },
   { component: Onboarding_3, duration: 3000 },
 ];

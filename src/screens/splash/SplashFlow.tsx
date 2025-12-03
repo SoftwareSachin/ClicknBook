@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 // Import all splash screens
-import splash_2 from './splash_2';
+import Splash_2 from './Splash_2';
 import Splash_3 from './Splash_3';
 import Onboarding_1 from './Onboarding_1';
 import Onboarding_2 from './Onboarding_2';
@@ -20,7 +20,7 @@ export default function SplashFlow({ onComplete, onSplashComplete }: Props) {
   const navigation = useNavigation();
   
   const splashScreens = [
-    { name: 'splash_2', component: splash_2, duration: 3000 },
+    { name: 'Splash_2', component: Splash_2, duration: 3000 },
     { name: 'Splash_3', component: Splash_3, duration: 3000 },
     { name: 'Onboarding_1', component: Onboarding_1, duration: 3000 },
     { name: 'Onboarding_2', component: Onboarding_2, duration: 3000 },

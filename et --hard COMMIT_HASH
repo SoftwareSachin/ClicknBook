@@ -1,0 +1,48 @@
+[33mff383ca[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: pull --tags origin main: Fast-forward
+[33mf22812a[m HEAD@{1}: reset: moving to f22812a3191a05ae8b7a51a565daa5610f3c0f15
+[33mff383ca[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{2}: commit (merge): resolve
+[33m4d55c54[m HEAD@{3}: reset: moving to 4d55c541d18f65d103c20cfb1de5ab485b6c2a69
+[33m4d55c54[m HEAD@{4}: commit (merge): Temporary commit before revert
+[33m8db4008[m HEAD@{5}: commit: changes
+[33ma66807d[m HEAD@{6}: commit: name changing
+[33m3b6ee4a[m HEAD@{7}: commit: new changes
+[33m7f10a55[m HEAD@{8}: commit: changing screen name
+[33m6fe5e6c[m HEAD@{9}: commit: changing new screen
+[33m54852da[m HEAD@{10}: commit: changes screen names
+[33m2567e07[m HEAD@{11}: commit: modified screens
+[33m114add2[m HEAD@{12}: commit: Backend implementation of login and signup screen
+[33mdfd493e[m HEAD@{13}: Branch: renamed refs/heads/main to refs/heads/main
+[33mdfd493e[m HEAD@{15}: commit: added sortby
+[33m2695bf1[m HEAD@{16}: commit: added new screens
+[33m9fa578a[m HEAD@{17}: commit: SettingScreens is changed
+[33m1a624ab[m HEAD@{18}: commit: changes
+[33m2632332[m HEAD@{19}: commit: Changes
+[33m252857a[m HEAD@{20}: commit: fixing payment screen
+[33ma7b460f[m HEAD@{21}: commit: add payment checkout
+[33m733df9a[m HEAD@{22}: commit: new changes
+[33m996e2a8[m HEAD@{23}: commit: new changes
+[33m8e85492[m HEAD@{24}: commit: New screens
+[33mcd0bd11[m HEAD@{25}: checkout: moving from main to main
+[33mcd0bd11[m HEAD@{26}: checkout: moving from main to main
+[33mcd0bd11[m HEAD@{27}: commit: 5
+[33md0a6483[m HEAD@{28}: reset: moving to origin/main
+[33m2d85b4e[m HEAD@{29}: pull origin main: Fast-forward
+[33m1ae4e6e[m HEAD@{30}: pull origin main: Fast-forward
+[33maaba708[m HEAD@{31}: commit (merge): Resolved merge conflict in Register.tsx
+[33m7905027[m HEAD@{32}: Branch: renamed refs/heads/main to refs/heads/main
+[33m7905027[m HEAD@{34}: commit: Fixing
+[33mb7acd8e[m HEAD@{35}: pull --tags origin main: Fast-forward
+[33m6b13266[m HEAD@{36}: Branch: renamed refs/heads/main to refs/heads/main
+[33m6b13266[m HEAD@{38}: commit: Adding new screens
+[33m924febc[m HEAD@{39}: pull --tags origin main: Fast-forward
+[33m80e0fd2[m HEAD@{40}: pull --tags origin main: Fast-forward
+[33m77aed07[m HEAD@{41}: checkout: moving from main to main
+[33m77aed07[m HEAD@{42}: checkout: moving from main to main
+[33m77aed07[m HEAD@{43}: Branch: renamed refs/heads/main to refs/heads/main
+[33m77aed07[m HEAD@{45}: commit (merge): Initial commit: PropertyRental app and backend
+[33me3571b6[m[33m ([m[1;32mbackup-local-main[m[33m)[m HEAD@{46}: reset: moving to HEAD
+[33me3571b6[m[33m ([m[1;32mbackup-local-main[m[33m)[m HEAD@{47}: merge origin/main: updating HEAD
+[33me3571b6[m[33m ([m[1;32mbackup-local-main[m[33m)[m HEAD@{48}: checkout: moving from main to main
+[33me3571b6[m[33m ([m[1;32mbackup-local-main[m[33m)[m HEAD@{49}: checkout: moving from main to main
+[33me3571b6[m[33m ([m[1;32mbackup-local-main[m[33m)[m HEAD@{50}: Branch: renamed refs/heads/master to refs/heads/main
+[33me3571b6[m[33m ([m[1;32mbackup-local-main[m[33m)[m HEAD@{52}: commit (initial): Adding Splash screen

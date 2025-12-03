@@ -4,7 +4,7 @@ import { View, StyleSheet } from 'react-native';
 
 // Import all splash screens
 import Splash_1 from '../screens/splash/Splash_1';
-import splash_2 from '../screens/splash/splash_2';
+import Splash_2 from '../screens/splash/Splash_2';
 import Splash_3 from '../screens/splash/Splash_3';
 import Onboarding_1 from '../screens/splash/Onboarding_1';
 import Onboarding_2 from '../screens/splash/Onboarding_2';
@@ -24,7 +24,7 @@ export function SplashNavigator({ onSplashComplete }: SplashNavigatorProps) {
   
   const splashScreens = [
     { name: 'Splash_1', component: Splash_1, duration: 3000 },
-    { name: 'splash_2', component: splash_2, duration: 3000 },
+    { name: 'Splash_2', component: Splash_2, duration: 3000 },
     { name: 'Splash_3', component: Splash_3, duration: 3000 },
     { name: 'Onboarding_1', component: Onboarding_1, duration: 3000 },
     { name: 'Onboarding_2', component: Onboarding_2, duration: 3000 },
@@ -93,7 +93,7 @@ export function StackSplashNavigator({ onSplashComplete }: SplashNavigatorProps)
       }}
     >
       <Stack.Screen name="Splash_1" component={Splash_1} />
-      <Stack.Screen name="splash_2" component={splash_2} />
+      <Stack.Screen name="Splash_2" component={Splash_2} />
       <Stack.Screen name="Splash_3" component={Splash_3} />
       <Stack.Screen name="Onboarding_1" component={Onboarding_1} />
       <Stack.Screen name="Onboarding_2" component={Onboarding_2} />
