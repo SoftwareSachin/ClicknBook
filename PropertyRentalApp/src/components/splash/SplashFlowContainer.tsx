@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
 
 // Import all splash screens
 import splash_2 from './splash_2';
 import Splash_3 from './Splash_3';
-import { AuthNavigator } from '../../navigation/AuthNavigator';
 import Onboarding_1 from './Onboarding_1';
 import Onboarding_2 from './Onboarding_2';
 import Onboarding_3 from './Onboarding_3';
 import Onboarding_4 from './Onboarding_4';
-import { AuthProvider } from '../../context/AuthContext';
 
 interface Props {
   onSplashComplete?: () => void;
@@ -25,18 +22,7 @@ export default function SplashFlowContainer({ onSplashComplete }: Props) {
     { name: 'Onboarding_1', component: Onboarding_1 },
     { name: 'Onboarding_2', component: Onboarding_2 },
     { name: 'Onboarding_3', component: Onboarding_3 },
-    { name: 'Onboarding_4', component: Onboarding_4 },
-    { 
-      name: 'Auth', 
-      component: () => (
-        <NavigationContainer>
-          <AuthProvider>
-            <AuthNavigator />
-          </AuthProvider>
-        </NavigationContainer>
-      ), 
-      isNavigator: true 
-    },
+    { name: 'Onboarding_4', component: Onboarding_4 }
   ];
 
   console.log('Current screen index:', currentScreenIndex);
@@ -79,11 +65,6 @@ export default function SplashFlowContainer({ onSplashComplete }: Props) {
     }
   };
 
-  // If the current screen is a navigator (like AuthNavigator), render it directly
-  if (CurrentScreen.isNavigator) {
-    const ScreenComponent = CurrentScreen.component;
-    return <ScreenComponent />;
-  }
 
   return (
     <View style={styles.container}>
